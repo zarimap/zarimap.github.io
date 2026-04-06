@@ -1,23 +1,59 @@
-/* 1. 画面全体（body）を「縦並びの箱」にする */
+/* 1. 画面全体の土台 */
 body {
     margin: 0;
-    padding: 0;
     display: flex;
-    flex-direction: column;
-    height: 100vh; /* 画面の高さ100%を使い切る */
-    overflow: hidden; /* 画面からはみ出さないようにする */
+    flex-direction: column; /* 基本は縦並び（ヘッダー、メイン、フッター） */
+    height: 100vh;
+    overflow: hidden;
 }
 
-/* 2. ヘッダー（Zarimapの文字が入る場所） */
 header {
-    background-color: #e67e22; /* ザリガニオレンジ */
+    background-color: #e67e22;
     color: white;
-    padding: 10px 20px;
-    flex-shrink: 0; /* ヘッダーが潰れないように固定 */
+    padding: 10px;
+    flex-shrink: 0;
 }
 
-/* 3. 地図（残りのスペースを全部使う） */
+/* 2. メインコンテンツ（マップとデータを入れる横並びの箱） */
+.main-container {
+    display: flex;
+    flex-direction: row; /* パソコンでは横並び */
+    flex-grow: 1;        /* 残りの高さを全部使う */
+    overflow: hidden;
+}
+
+/* 3. マップの設定（3分の2 = 66.6%） */
 #map {
-    flex-grow: 1; /* これが「残りを全部埋める」魔法の言葉 */
-    width: 100%;
+    flex-basis: 66.6%;
+    width: 66.6%;
+    height: 100%;
+}
+
+/* 4. データ表示エリア（3分の1 = 33.3%） */
+#data-panel {
+    flex-basis: 33.3%;
+    width: 33.3%;
+    background-color: #fdf2e9;
+    padding: 20px;
+    overflow-y: auto; /* データが増えてもスクロールできる */
+    border-left: 2px solid #e67e22;
+}
+
+/* 5. 【スマホ・縦画面用】の切り替え設定 */
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column; /* スマホでは縦並びにスイッチ！ */
+    }
+    
+    #map {
+        flex-basis: 50%; /* 上半分をマップ */
+        width: 100%;
+    }
+    
+    #data-panel {
+        flex-basis: 50%; /* 下半分をデータ */
+        width: 100%;
+        border-left: none;
+        border-top: 2px solid #e67e22;
+    }
 }
