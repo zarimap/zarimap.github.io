@@ -12,7 +12,7 @@ let tileUrl;
 let attribution;
 
 if (typeof currentLang !== 'undefined' && currentLang === 'ja') {
-    // 日本語版：国土地理院の淡色地図
+    // 日本語版：OpenStreetMapのCARTO
     tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
     attribution = '© OpenStreetMap contributors © CARTO';
 } else {
