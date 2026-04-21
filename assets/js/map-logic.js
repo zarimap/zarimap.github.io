@@ -17,13 +17,13 @@ L.tileLayer(tileUrl, {
 
 // --- データの管理 ---
 let allLocations = []; 
-let isDetailView = false; // 【修正】詳細表示中かどうかを管理するフラグ
+let isDetailView = false; // 詳細表示中かどうかを管理するフラグ
 
 /**
  * 右側のパネルを「今見えている範囲のリスト」に書き換える
  */
 function updateVisibleList() {
-    // 【修正】詳細を表示している最中なら、リストの更新を中止する
+    // 詳細を表示している最中なら、リストの更新を中止する
     if (isDetailView) return;
 
     const infoContent = document.getElementById('info-content');
@@ -43,7 +43,6 @@ function updateVisibleList() {
         html += `<ul id="location-list">`;
         visibleLocations.forEach((loc) => {
             const name = (currentLang === 'ja') ? loc.name_ja : loc.name_en;
-            // 名前にシングルクォートが含まれても壊れないようにエスケープ
             const safeName = name.replace(/'/g, "\\'");
             html += `<li onclick="showDetailsFromName('${safeName}')">${name}</li>`;
         });
@@ -59,7 +58,7 @@ function updateVisibleList() {
 window.showDetailsFromName = function(name) {
     const loc = allLocations.find(l => (l.name_ja === name || l.name_en === name));
     if (loc) {
-        isDetailView = true; // 【修正】地図を動かす前に詳細モードをONにする
+        isDetailView = true; 
         map.panTo([loc.lat, loc.lng]); 
         showDetails(loc); 
     }
@@ -69,7 +68,7 @@ window.showDetailsFromName = function(name) {
  * 右側のパネルに「詳細情報」を表示する
  */
 function showDetails(loc) {
-    isDetailView = true; // 詳細モードを確定させる
+    isDetailView = true; 
     const infoContent = document.getElementById('info-content');
     const name = (currentLang === 'ja') ? loc.name_ja : loc.name_en;
     const desc = (currentLang === 'ja') ? loc.desc_ja : loc.desc_en;
@@ -96,11 +95,11 @@ function showDetails(loc) {
 }
 
 /**
- * 【追加】詳細を閉じてリストに戻るための関数
+ * 詳細を閉じてリストに戻るための関数
  */
 window.closeDetails = function() {
-    isDetailView = false; // 詳細モードを解除
-    updateVisibleList();  // 今の画面範囲でリストを再描画
+    isDetailView = false; 
+    updateVisibleList();  
 };
 
 // 3. CSVファイルを読み込んで処理する
@@ -126,13 +125,33 @@ fetch('../../assets/data/zarigani.csv')
 
             const marker = L.marker([locData.lat, locData.lng]).addTo(map);
 
-            const popupLabel = (currentLang === 'ja') ? '詳細を見る' : 'Read More';
-            let popupHtml = `<b>${(currentLang === 'ja' ? locData.name_ja : locData.name_en)}</b><br>`;
+            // --- 吹き出し（ポップアップ）のリッチ化 ---
+            const name = (currentLang === 'ja') ? locData.name_ja : locData.name_en;
+            const desc = (currentLang === 'ja') ? locData.desc_ja : locData.desc_en;
+            const popupLabel = (currentLang === 'ja') ? '詳細サイトへ' : 'Visit Site';
+            
+            // 説明文を30文字でカット
+            const shortDesc = desc.length > 30 ? desc.substring(0, 30) + "..." : desc;
+
+            let popupHtml = `
+                <div style="min-width: 150px;">
+                    <b style="font-size: 1.1rem; color: #e67e22;">${name}</b><br>
+                    <p style="margin: 5px 0; font-size: 0.9rem; line-height: 1.4;">${shortDesc}</p>
+            `;
+
             if (locData.url) {
-                popupHtml += `<a href="${locData.url}" target="_blank" rel="noopener noreferrer">${popupLabel}</a>`;
+                popupHtml += `
+                    <a href="${locData.url}" target="_blank" rel="noopener noreferrer" 
+                       style="color: #e67e22; font-weight: bold; text-decoration: underline;">
+                       ${popupLabel}
+                    </a>
+                `;
             }
+            popupHtml += `</div>`;
+
             marker.bindPopup(popupHtml);
 
+            // ピンをクリックした時に右パネルも連動
             marker.on('click', () => {
                 showDetails(locData);
             });
