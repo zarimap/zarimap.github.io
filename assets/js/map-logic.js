@@ -4,11 +4,9 @@
  */
 
 // 1. 地図の初期設定
-// [緯度, 経度] は、最初に表示したい中心地点に合わせて調整してください
 const map = L.map('map').setView([35.6895, 139.6917], 15);
 
-// 2. 背景タイルの設定（国土地理院・淡色地図）
-// ※CSSのフィルターで水色を強調する設定にしています
+// 2. 背景タイルの設定
 const tileUrl = 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png';
 const attribution = '© 国土地理院';
 
@@ -18,38 +16,53 @@ L.tileLayer(tileUrl, {
 }).addTo(map);
 
 // --- データの管理 ---
-let allLocations = []; // CSVから読み込んだ全データを保存する配列
+let allLocations = []; 
 
 /**
- * 右側のパネルを「生息地一覧」に書き換える関数
+ * 【新機能】右側のパネルを「今見えている範囲のリスト」に書き換える
  */
-function showDefaultList() {
+function updateVisibleList() {
     const infoContent = document.getElementById('info-content');
-    const listTitle = (currentLang === 'ja') ? '生息地一覧' : 'Habitat List';
+    const listTitle = (currentLang === 'ja') ? 'このエリアの生息地' : 'Habitats in this area';
     
-    let html = `<h3>${listTitle}</h3><ul id="location-list">`;
-    
-    // 読み込んだデータからリストを生成
-    allLocations.forEach((loc, index) => {
-        const name = (currentLang === 'ja') ? loc.name_ja : loc.name_en;
-        html += `<li onclick="focusMarker(${index})">${name}</li>`;
+    // 現在の地図の表示範囲（四角い枠）を取得
+    const bounds = map.getBounds();
+
+    // 表示範囲内にあるデータだけを絞り込む
+    const visibleLocations = allLocations.filter(loc => {
+        return bounds.contains([loc.lat, loc.lng]);
     });
+
+    let html = `<h3>${listTitle}</h3>`;
     
-    html += `</ul>`;
+    if (visibleLocations.length === 0) {
+        html += `<p style="color:#999; font-size:0.9rem;">${(currentLang === 'ja' ? 'この付近にデータはありません' : 'No data in this area')}</p>`;
+    } else {
+        html += `<ul id="location-list">`;
+        visibleLocations.forEach((loc) => {
+            const name = (currentLang === 'ja') ? loc.name_ja : loc.name_en;
+            // リストをクリックしたらその場所の詳細を出す
+            html += `<li onclick='showDetailsFromName("${name.replace(/"/g, '&quot;')}")'>${name}</li>`;
+        });
+        html += `</ul>`;
+    }
+    
     infoContent.innerHTML = html;
 }
 
 /**
- * リストをクリックした時にその場所へジャンプする関数
+ * リストから名前でデータを検索して詳細を表示する
  */
-window.focusMarker = function(index) {
-    const loc = allLocations[index];
-    map.flyTo([loc.lat, loc.lng], 16);
-    showDetails(loc);
+window.showDetailsFromName = function(name) {
+    const loc = allLocations.find(l => (l.name_ja === name || l.name_en === name));
+    if (loc) {
+        map.panTo([loc.lat, loc.lng]); 
+        showDetails(loc); 
+    }
 };
 
 /**
- * 右側のパネルに「詳細情報」を表示する関数
+ * 右側のパネルに「詳細情報」を表示する
  */
 function showDetails(loc) {
     const infoContent = document.getElementById('info-content');
@@ -60,13 +73,12 @@ function showDetails(loc) {
     let html = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <span style="background:#e67e22; color:white; padding:2px 8px; border-radius:4px; font-size:0.8rem;">Data Card</span>
-            <button onclick="showDefaultList()" style="cursor:pointer; font-size:28px; border:none; background:none; color:#999;">&times;</button>
+            <button onclick="updateVisibleList()" style="cursor:pointer; font-size:28px; border:none; background:none; color:#999;">&times;</button>
         </div>
         <h4>${name}</h4>
         <p style="white-space: pre-wrap;">${desc}</p>
     `;
 
-    // URLがある場合のみボタンを表示
     if (loc.url && loc.url !== "") {
         html += `
             <a href="${loc.url}" target="_blank" rel="noopener noreferrer" 
@@ -75,11 +87,10 @@ function showDetails(loc) {
             </a>
         `;
     }
-
     infoContent.innerHTML = html;
 }
+
 // 3. CSVファイルを読み込んで処理する
-// パスは index.html から見た相対パス（../../assets/data/zarigani.csv）
 fetch('../../assets/data/zarigani.csv')
     .then(response => response.text())
     .then(csvData => {
@@ -95,14 +106,13 @@ fetch('../../assets/data/zarigani.csv')
                 lng: parseFloat(columns[3]),
                 desc_ja: columns[4].trim(),
                 desc_en: columns[5].trim(),
-                url: columns[6] ? columns[6].trim() : "" // 7番目の列（URL）を取得
+                url: columns[6] ? columns[6].trim() : ""
             };
 
             allLocations.push(locData);
 
             const marker = L.marker([locData.lat, locData.lng]).addTo(map);
 
-            // --- 変更点2: 吹き出し（ポップアップ）にリンクを追加 ---
             const popupLabel = (currentLang === 'ja') ? '詳細を見る' : 'Read More';
             let popupHtml = `<b>${(currentLang === 'ja' ? locData.name_ja : locData.name_en)}</b><br>`;
             if (locData.url) {
@@ -114,5 +124,12 @@ fetch('../../assets/data/zarigani.csv')
                 showDetails(locData);
             });
         }
-        showDefaultList();
+        
+        // 読み込み完了後に、最初の表示範囲でリストを作る
+        updateVisibleList(); 
     });
+
+/**
+ * 4. 地図が動いた時にリストを更新する設定
+ */
+map.on('moveend', updateVisibleList);
