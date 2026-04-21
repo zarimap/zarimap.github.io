@@ -97,3 +97,8 @@ html[lang="en"] #map {
         border-top: 3px solid #e67e22;
     }
 }
+/* 地図上のピン（マーカー）だけ色を変える魔法 */
+.leaflet-marker-icon {
+    /* 色を反転させてオレンジっぽくする設定 */
+    filter: hue-rotate(150deg) saturate(2);
+}
