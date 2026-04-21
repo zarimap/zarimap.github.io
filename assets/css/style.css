@@ -57,6 +57,20 @@ header {
     border-radius: 8px;
     margin: 10px 0;
 }
+/* 詳細パネル内のリンクボタンのホバー効果 */
+#info-content a:hover {
+    background-color: #d35400 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+/* 吹き出し（ポップアップ）内のリンク */
+.leaflet-popup-content a {
+    color: #e67e22;
+    font-weight: bold;
+    text-decoration: none;
+}
 
 /* 一覧・詳細の装飾（前回の追加分をここにまとめる） */
 #location-list { list-style: none; padding: 0; }
