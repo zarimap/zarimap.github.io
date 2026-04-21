@@ -17,18 +17,20 @@ L.tileLayer(tileUrl, {
 
 // --- データの管理 ---
 let allLocations = []; 
+let isDetailView = false; // 【修正】詳細表示中かどうかを管理するフラグ
 
 /**
- * 【新機能】右側のパネルを「今見えている範囲のリスト」に書き換える
+ * 右側のパネルを「今見えている範囲のリスト」に書き換える
  */
 function updateVisibleList() {
+    // 【修正】詳細を表示している最中なら、リストの更新を中止する
+    if (isDetailView) return;
+
     const infoContent = document.getElementById('info-content');
     const listTitle = (currentLang === 'ja') ? 'このエリアの生息地' : 'Habitats in this area';
     
-    // 現在の地図の表示範囲（四角い枠）を取得
     const bounds = map.getBounds();
 
-    // 表示範囲内にあるデータだけを絞り込む
     const visibleLocations = allLocations.filter(loc => {
         return bounds.contains([loc.lat, loc.lng]);
     });
@@ -41,8 +43,9 @@ function updateVisibleList() {
         html += `<ul id="location-list">`;
         visibleLocations.forEach((loc) => {
             const name = (currentLang === 'ja') ? loc.name_ja : loc.name_en;
-            // リストをクリックしたらその場所の詳細を出す
-            html += `<li onclick='showDetailsFromName("${name.replace(/"/g, '&quot;')}")'>${name}</li>`;
+            // 名前にシングルクォートが含まれても壊れないようにエスケープ
+            const safeName = name.replace(/'/g, "\\'");
+            html += `<li onclick="showDetailsFromName('${safeName}')">${name}</li>`;
         });
         html += `</ul>`;
     }
@@ -56,6 +59,7 @@ function updateVisibleList() {
 window.showDetailsFromName = function(name) {
     const loc = allLocations.find(l => (l.name_ja === name || l.name_en === name));
     if (loc) {
+        isDetailView = true; // 【修正】地図を動かす前に詳細モードをONにする
         map.panTo([loc.lat, loc.lng]); 
         showDetails(loc); 
     }
@@ -65,6 +69,7 @@ window.showDetailsFromName = function(name) {
  * 右側のパネルに「詳細情報」を表示する
  */
 function showDetails(loc) {
+    isDetailView = true; // 詳細モードを確定させる
     const infoContent = document.getElementById('info-content');
     const name = (currentLang === 'ja') ? loc.name_ja : loc.name_en;
     const desc = (currentLang === 'ja') ? loc.desc_ja : loc.desc_en;
@@ -73,7 +78,7 @@ function showDetails(loc) {
     let html = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <span style="background:#e67e22; color:white; padding:2px 8px; border-radius:4px; font-size:0.8rem;">Data Card</span>
-            <button onclick="updateVisibleList()" style="cursor:pointer; font-size:28px; border:none; background:none; color:#999;">&times;</button>
+            <button onclick="closeDetails()" style="cursor:pointer; font-size:28px; border:none; background:none; color:#999;">&times;</button>
         </div>
         <h4>${name}</h4>
         <p style="white-space: pre-wrap;">${desc}</p>
@@ -89,6 +94,14 @@ function showDetails(loc) {
     }
     infoContent.innerHTML = html;
 }
+
+/**
+ * 【追加】詳細を閉じてリストに戻るための関数
+ */
+window.closeDetails = function() {
+    isDetailView = false; // 詳細モードを解除
+    updateVisibleList();  // 今の画面範囲でリストを再描画
+};
 
 // 3. CSVファイルを読み込んで処理する
 fetch('../../assets/data/zarigani.csv')
@@ -125,7 +138,6 @@ fetch('../../assets/data/zarigani.csv')
             });
         }
         
-        // 読み込み完了後に、最初の表示範囲でリストを作る
         updateVisibleList(); 
     });
 
