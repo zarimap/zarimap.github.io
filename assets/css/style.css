@@ -1,3 +1,6 @@
+* {
+    box-sizing: border-box;
+}
 /* 全体のレイアウト */
 body {
     margin: 0;
