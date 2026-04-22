@@ -91,21 +91,41 @@ header {
 /* -------------------------------------------
    スマホ対応 (画面幅が768px以下の時)
 ------------------------------------------- */
+/* スマホ対応 (画面幅が768px以下の時) */
 @media (max-width: 768px) {
     .main-container { 
         flex-direction: column; /* 縦並びに切り替え */
     }
 
     #map { 
-        flex-basis: 40vh; /* スマホでは地図の高さを画面の40%に固定 */
+        flex-basis: 40vh; /* 地図の高さを画面の40%に固定 */
         width: 100%; 
     }
 
     #data-panel { 
-        flex-basis: 60vh; /* 残りの60%をパネルに */
+        flex-basis: 60vh; /* パネルを60%に */
         width: 100%; 
         border-left: none; 
         border-top: 2px solid #e67e22; 
         padding: 15px;
+    }
+
+    /* --- ここから追加：タイトルとメニューの調整 --- */
+    h1 {
+        font-size: 1.1rem; /* 文字サイズを少し下げて1行に収める */
+        white-space: nowrap; /* 絶対に改行させない */
+    }
+
+    .subtitle {
+        display: none; /* 英語版の長いサブタイトルをスマホでは隠す */
+    }
+
+    .header-nav ul {
+        gap: 8px; /* メニューボタン同士の間隔を詰める */
+    }
+
+    .header-nav a {
+        padding: 5px 8px; /* ボタンを少し小さくしてスペースを確保 */
+        font-size: 0.8rem;
     }
 }
