@@ -25,7 +25,7 @@ header {
     flex-basis: 66.6%;
     width: 66.6%;
     height: 100%;
-    filter: grayscale(0.5) contrast(1.2) brightness(1.15) saturate(2.5) hue-rotate(-5deg);
+    filter: grayscale(0.5) brightness(1.15) saturate(2.5) hue-rotate(-5deg);
 }
 
 /* 右側パネルの中身を整理 */
