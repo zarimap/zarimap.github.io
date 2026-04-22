@@ -88,6 +88,14 @@ header {
 #location-list li { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; }
 #location-list li:hover { background-color: #fdf2e9; }
 
+/* PC/iPadでのサブタイトルの見た目 */
+.subtitle {
+    font-size: 0.9rem;   /* 少し小さく */
+    font-weight: normal; /* 細めにしてタイトルと差をつける */
+    margin-left: 10px;   /* Zarimapとの間に隙間を作る */
+    color: #ffe0b2;      /* 少し薄いオレンジ色にするとおしゃれ */
+}
+
 /* -------------------------------------------
    スマホ対応 (画面幅が768px以下の時)
 ------------------------------------------- */
