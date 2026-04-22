@@ -4,7 +4,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    overflow: hidden;
+    overflow: hidden; /* 画面全体がガタガタ動かないように固定 */
 }
 
 header {
@@ -16,7 +16,7 @@ header {
 
 .main-container {
     display: flex;
-    flex-direction: row;
+    flex-direction: row; /* 横並びが基本 */
     flex-grow: 1;
     overflow: hidden;
 }
@@ -27,10 +27,15 @@ header {
     height: 100%;
 }
 
-/* 右側パネルの中身を整理 */
+/* 右側パネル */
 #data-panel {
-    padding: 25px; /* 余白を少し広げて高級感を出す */
-    line-height: 1.8; /* 行間を広くして読みやすく */
+    flex-basis: 33.4%;
+    width: 33.4%;
+    padding: 25px;
+    background: #fff;
+    overflow-y: auto; /* 【重要】中身が長くてもスクロールできるように */
+    line-height: 1.8;
+    border-left: 1px solid #ddd;
 }
 
 /* 詳細エリアの見出し */
@@ -38,25 +43,19 @@ header {
     font-size: 1.4rem;
     color: #333;
     margin: 10px 0;
-    border-bottom: 2px solid #e67e22; /* 下線をつけてタイトルを強調 */
+    border-bottom: 2px solid #e67e22;
     padding-bottom: 5px;
 }
 
-/* 詳細の本文（pタグ） */
+/* 詳細の本文 */
 #info-content p {
     font-size: 1rem;
     color: #444;
-    white-space: pre-wrap; /* これを入れるとCSV内の改行がそのまま反映されます！ */
+    white-space: pre-wrap;
     margin-bottom: 20px;
 }
 
-/* 画像などを入れたくなった時用の設定 */
-#info-content img {
-    max-width: 100%;
-    border-radius: 8px;
-    margin: 10px 0;
-}
-/* 詳細パネル内のリンクボタンのホバー効果 */
+/* リンクボタンのホバー効果 */
 #info-content a:hover {
     background-color: #d35400 !important;
     transform: translateY(-2px);
@@ -64,25 +63,29 @@ header {
     transition: all 0.2s ease;
 }
 
-/* 吹き出し（ポップアップ）内のリンク */
-.leaflet-popup-content a {
-    color: #e67e22;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-/* 一覧・詳細の装飾（前回の追加分をここにまとめる） */
+/* リストの装飾 */
 #location-list { list-style: none; padding: 0; }
-#location-list li { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
+#location-list li { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; }
 #location-list li:hover { background-color: #fdf2e9; }
 
-/* スマホ対応 */
+/* -------------------------------------------
+   スマホ対応 (画面幅が768px以下の時)
+------------------------------------------- */
 @media (max-width: 768px) {
-    .main-container { flex-direction: column; }
-    #map, #data-panel { flex-basis: 50%; width: 100%; border-left: none; border-top: 2px solid #e67e22; }
-}
-/* 地図上のピン（マーカー）だけ色を変える魔法 */
-.leaflet-marker-icon {
-    /* 色を反転させてオレンジっぽくする設定 */
-    filter: hue-rotate(150deg) saturate(2);
+    .main-container { 
+        flex-direction: column; /* 縦並びに切り替え */
+    }
+
+    #map { 
+        flex-basis: 40vh; /* スマホでは地図の高さを画面の40%に固定 */
+        width: 100%; 
+    }
+
+    #data-panel { 
+        flex-basis: 60vh; /* 残りの60%をパネルに */
+        width: 100%; 
+        border-left: none; 
+        border-top: 2px solid #e67e22; 
+        padding: 15px;
+    }
 }
