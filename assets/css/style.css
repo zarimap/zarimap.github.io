@@ -1,10 +1,9 @@
 * {
     box-sizing: border-box;
 }
-/* 全体のレイアウト */
+
 /* 1. 全体の設定 */
 body {
-    /* フォント設定 */
     font-family: 
         "BIZ UDPGothic", 
         "Hiragino Sans", 
@@ -12,21 +11,21 @@ body {
         "Noto Sans JP", 
         "Meiryo", 
         sans-serif;
-
     margin: 0;
     display: flex;
     flex-direction: column;
     height: 100vh;
-    overflow: hidden; /* 画面全体がガタガタ動かないように固定 */
-    -webkit-font-smoothing: antialiased; /* 文字を滑らかに */
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* 2. タイトルの設定（bodyの外に書く） */
+/* 2. タイトルの設定 */
 h1, h3, h4 {
-    font-family: inherit; /* bodyのフォントを引き継ぐ */
+    font-family: inherit;
     font-weight: 700;
-    margin: 0; /* 余計な余白をカット */
+    margin: 0;
 }
+
 header {
     background-color: #e67e22;
     color: white;
@@ -34,9 +33,36 @@ header {
     flex-shrink: 0;
 }
 
+/* ヘッダー内を横並びにする（PC用） */
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 100%;
+}
+
+.header-nav ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 15px;
+}
+
+.header-nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
 .main-container {
     display: flex;
-    flex-direction: row; /* 横並びが基本 */
+    flex-direction: row;
     flex-grow: 1;
     overflow: hidden;
 }
@@ -47,13 +73,12 @@ header {
     height: 100%;
 }
 
-/* 右側パネル */
 #data-panel {
     flex-basis: 33.4%;
     width: 33.4%;
     padding: 25px;
     background: #fff;
-    overflow-y: auto; /* 【重要】中身が長くてもスクロールできるように */
+    overflow-y: auto;
     line-height: 1.8;
     border-left: 1px solid #ddd;
 }
@@ -67,7 +92,6 @@ header {
     padding-bottom: 5px;
 }
 
-/* 詳細の本文 */
 #info-content p {
     font-size: 1rem;
     color: #444;
@@ -75,65 +99,67 @@ header {
     margin-bottom: 20px;
 }
 
-/* リンクボタンのホバー効果 */
-#info-content a:hover {
-    background-color: #d35400 !important;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: all 0.2s ease;
-}
-
-/* リストの装飾 */
 #location-list { list-style: none; padding: 0; }
 #location-list li { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; }
 #location-list li:hover { background-color: #fdf2e9; }
 
-/* PC/iPadでのサブタイトルの見た目 */
 .subtitle {
-    font-size: 0.9rem;   /* 少し小さく */
-    font-weight: normal; /* 細めにしてタイトルと差をつける */
-    margin-left: 10px;   /* Zarimapとの間に隙間を作る */
-    color: #ffe0b2;      /* 少し薄いオレンジ色にするとおしゃれ */
+    font-size: 0.9rem;
+    font-weight: normal;
+    margin-left: 10px;
+    color: #ffe0b2;
 }
 
 /* -------------------------------------------
-   スマホ対応 (画面幅が768px以下の時)
+    スマホ対応 (画面幅が768px以下の時)
 ------------------------------------------- */
-/* スマホ対応 (画面幅が768px以下の時) */
 @media (max-width: 768px) {
+    header {
+        padding: 10px; /* 余白を少し詰める */
+    }
+
+    .header-inner {
+        flex-direction: column; /* スマホではロゴとメニューを2段にする */
+        gap: 8px;
+    }
+
+    /* スマホで不要なメニュー（pc-only）を消す */
+    .pc-only {
+        display: none;
+    }
+
     .main-container { 
-        flex-direction: column; /* 縦並びに切り替え */
+        flex-direction: column; 
     }
 
     #map { 
-        flex-basis: 40vh; /* 地図の高さを画面の40%に固定 */
+        flex-basis: 40vh; 
         width: 100%; 
     }
 
     #data-panel { 
-        flex-basis: 60vh; /* パネルを60%に */
+        flex-basis: 60vh; 
         width: 100%; 
         border-left: none; 
         border-top: 2px solid #e67e22; 
         padding: 15px;
     }
 
-    /* --- ここから追加：タイトルとメニューの調整 --- */
     h1 {
-        font-size: 1.1rem; /* 文字サイズを少し下げて1行に収める */
-        white-space: nowrap; /* 絶対に改行させない */
+        font-size: 1.1rem;
+        white-space: nowrap;
     }
 
     .subtitle {
-        display: none; /* 英語版の長いサブタイトルをスマホでは隠す */
+        display: none; /* スマホではサブタイトルを隠す */
     }
 
     .header-nav ul {
-        gap: 8px; /* メニューボタン同士の間隔を詰める */
+        gap: 8px;
     }
 
     .header-nav a {
-        padding: 5px 8px; /* ボタンを少し小さくしてスペースを確保 */
+        padding: 5px 8px;
         font-size: 0.8rem;
     }
 }
