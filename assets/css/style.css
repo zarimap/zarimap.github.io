@@ -26,18 +26,27 @@ h1, h3, h4 {
     margin: 0;
 }
 
+/* --- PC版：1行に制限する設定 --- */
+h1 {
+    white-space: nowrap;     /* 折り返しを禁止 */
+    overflow: hidden;        /* はみ出た分を隠す */
+    text-overflow: ellipsis; /* 長すぎる場合は末尾を「...」に */
+    max-width: 60%;          /* メニュー用のスペースを確保 */
+}
+
 header {
     background-color: #e67e22;
     color: white;
     padding: 10px 20px;
     flex-shrink: 0;
+    height: 60px;            /* PC版のヘッダー高さを固定 */
 }
 
-/* ヘッダー内を横並びにする（PC用） */
 .header-inner {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: 100%;
     max-width: 100%;
 }
 
@@ -47,6 +56,7 @@ header {
     margin: 0;
     padding: 0;
     gap: 15px;
+    flex-wrap: nowrap;       /* メニューを1行に強制 */
 }
 
 .header-nav a {
@@ -58,8 +68,10 @@ header {
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 6px;
     background: rgba(255, 255, 255, 0.1);
+    white-space: nowrap;     /* ボタン内の文字も改行させない */
 }
 
+/* 3. メインコンテンツの設定 */
 .main-container {
     display: flex;
     flex-direction: row;
@@ -83,7 +95,7 @@ header {
     border-left: 1px solid #ddd;
 }
 
-/* 詳細エリアの見出し */
+/* 4. データ表示エリアの装飾 */
 #info-content h4 {
     font-size: 1.4rem;
     color: #333;
@@ -115,19 +127,51 @@ header {
 ------------------------------------------- */
 @media (max-width: 768px) {
     header {
-        padding: 10px; /* 余白を少し詰める */
+        padding: 8px 10px;
+        height: auto;           /* 中身（2段分）に合わせて広がる */
+        max-height: 100px;      /* 3段目に行かないよう高さを制限 */
+        overflow: hidden;
     }
 
     .header-inner {
-        flex-direction: column; /* スマホではロゴとメニューを2段にする */
-        gap: 8px;
+        flex-direction: column; /* ロゴとメニューを上下に分ける */
+        gap: 6px;
     }
 
-    /* スマホで不要なメニュー（pc-only）を消す */
     .pc-only {
+        display: none;          /* メニューの引き算（スマホでは消す） */
+    }
+
+    h1 {
+        font-size: 1.1rem;
+        max-width: 100%;
+        text-align: center;
+        /* スマホでもタイトルは1行（2行を超えない） */
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        white-space: normal;
+    }
+
+    .subtitle {
         display: none;
     }
 
+    /* メニュー段：2列（2行）まで許可する設定 */
+    .header-nav ul {
+        flex-wrap: wrap;        /* 横に並ばないときは2行目へ */
+        justify-content: center;
+        gap: 6px 10px;          /* 縦の間隔6px, 横10px */
+        max-height: 45px;       /* 3行目に行かないように高さを制限 */
+        overflow: hidden;       /* はみ出したメニューは隠す */
+    }
+
+    .header-nav a {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+
+    /* メインエリアの縦並び切り替え */
     .main-container { 
         flex-direction: column; 
     }
@@ -143,23 +187,5 @@ header {
         border-left: none; 
         border-top: 2px solid #e67e22; 
         padding: 15px;
-    }
-
-    h1 {
-        font-size: 1.1rem;
-        white-space: nowrap;
-    }
-
-    .subtitle {
-        display: none; /* スマホではサブタイトルを隠す */
-    }
-
-    .header-nav ul {
-        gap: 8px;
-    }
-
-    .header-nav a {
-        padding: 5px 8px;
-        font-size: 0.8rem;
     }
 }
