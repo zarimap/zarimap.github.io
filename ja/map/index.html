@@ -9,16 +9,28 @@
 </head>
 <body>
     <header>
-        <h1>ザリマップ <span class="subtitle">ザリガニの目撃情報を共有</span></h1>
+        <div class="header-inner">
+            <h1>Zarimap <span class="subtitle">ザリガニの目撃情報を共有</span></h1>
+            
+            <nav class="header-nav">
+                <ul>
+                    <li><a href="../../index.html">Top</a></li>
+                    
+                    <li class="pc-only"><a href="#">About</a></li>
+                    
+                    <li><a href="../../en/map/index.html">English</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
     
     <div class="main-container">
         <div id="map"></div>
 
         <div id="data-panel">
-            <h2>詳細情報</h2>
             <div id="info-content">
-                <p>マップのピンをクリックすると、ここに詳しい情報が表示されます。</p>
+                <h3>読み込み中...</h3>
+                <p>マップを動かして、近くの生息地を探してみましょう。</p>
             </div>
         </div>
     </div>
