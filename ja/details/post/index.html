@@ -16,7 +16,7 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         #map-picker {
-            height: 400px; /* 少し高くしました */
+            height: 400px;
             width: 100%;
             margin-bottom: 15px;
             border-radius: 8px;
@@ -137,7 +137,7 @@
                 <textarea id="description" name="description" rows="4" placeholder="ハサミが大きかった、水草の陰にいたなど"></textarea>
             </div>
 
-            <button type="submit" class="submit-btn">投稿内容を確認（仮）</button>
+            <button type="submit" class="submit-btn">Google フォームで送信する</button>
         </form>
     </main>
 
@@ -180,7 +180,6 @@
                 </div>
             `;
 
-            // すでにピンがあれば移動、なければ新規作成
             if (marker) {
                 marker.setLatLng(e.latlng).setPopupContent(popupHtml).openPopup();
             } else {
@@ -193,18 +192,22 @@
             const popPlace = document.getElementById('pop_place').value;
             const popDesc = document.getElementById('pop_desc').value;
 
-            // メインフォームの各項目に代入
             document.getElementById('place_name').value = popPlace;
             document.getElementById('description').value = popDesc;
 
             alert("情報を反映しました！残りの項目を確認して送信してください。");
         }
 
-        // フォーム送信時の処理
+        // フォーム送信時の処理（Google フォーム連携）
         document.getElementById('post-form').addEventListener('submit', function(e) {
             e.preventDefault();
+
+            // 1. 各項目の値を取得
             const lat = document.getElementById('lat').value;
+            const lng = document.getElementById('lng').value;
             const place = document.getElementById('place_name').value;
+            const species = document.getElementById('species').value;
+            const desc = document.getElementById('description').value;
 
             if (!lat) {
                 alert("地図をクリックして場所を選んでください！");
@@ -215,7 +218,26 @@
                 return;
             }
 
-            alert("投稿ありがとうございます！\n場所: " + place + "\n座標: " + lat + ", " + document.getElementById('lng').value);
+            // 2. Google フォームのベースURL
+            // 【重要】あなたのフォームIDに書き換えてください
+            const formUrl = "https://docs.google.com/forms/d/e/【あなたのフォームID】/viewform";
+
+            // 3. フォームの各項目IDに合わせてURLを組み立てる
+            // 【重要】entry.数字の部分を、事前入力URLから取得した数字に書き換えてください
+            const params = new URLSearchParams({
+                "entry.111111": place,   // 場所名のentry ID
+                "entry.222222": lat,     // 緯度のentry ID
+                "entry.333333": lng,     // 経度のentry ID
+                "entry.444444": species, // 種類のentry ID
+                "entry.555555": desc     // 説明のentry ID
+            });
+
+            // 4. 完成したURLへリダイレクト（別タブで開く）
+            const finalUrl = `${formUrl}?${params.toString()}`;
+            
+            if (confirm("入力した内容を Google フォームに送信しますか？")) {
+                window.open(finalUrl, '_blank');
+            }
         });
     </script>
 </body>
