@@ -2,26 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Zarimap - ザリガニ検索マップ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zarimap - Crayfish Search Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="../../assets/css/style.css" />
 </head>
 <body>
     <header>
-        <h1>
-            <a href="../../index.html" style="color: inherit; text-decoration: none;">
-                Zarimap <span class="subtitle">Sharing</span>
-            </a>
-        </h1>
+        <div class="header-inner">
+            <h1>
+                <a href="../../index.html" style="color: inherit; text-decoration: none;">
+                    Zarimap <span class="subtitle">Share crayfish sightings</span>
+                </a>
+            </h1>            
+            <nav class="header-nav">
+                <ul>
+                    <li><a href="../../index.html">Top</a></li>
+                    
+                    <li class="pc-only"><a href="#">About</a></li>
+                    
+                    <li><a href="../../ja/map/index.html">日本語</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
     
     <div class="main-container">
         <div id="map"></div>
 
         <div id="data-panel">
-            <h2>詳細情報</h2>
             <div id="info-content">
-                <p>マップのピンをクリックすると、ここに詳しい情報が表示されます。</p>
+                <h3>Loading...</h3>
+                <p>Move the map to explore habitats nearby.</p>
             </div>
         </div>
     </div>

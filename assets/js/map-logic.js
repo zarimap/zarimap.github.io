@@ -1,120 +1,194 @@
 /**
- * Zarimap - Map Logic (Multilingual & Interactive Sidebar)
+ * Zarimap - Map Logic
  * 2026 Zarimap Project
  */
 
-// 1. 地図の初期設定（[緯度, 経度], ズームレベル）
-// 表示したい場所の座標に書き換えてください
+// 1. 地図の初期設定
 const map = L.map('map').setView([35.6895, 139.6917], 15);
 
-// 2. 言語によって地図の「背景（タイル）」を切り替える
-let tileUrl;
-let attribution;
+// 2. 背景タイルの設定
+const tileUrl = 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png';
+const attribution = '© 国土地理院';
 
-if (typeof currentLang !== 'undefined' && currentLang === 'ja') {
-    // 日本語版：国土地理院の淡色地図
-    tileUrl = 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png';
-    attribution = '© 国土地理院';
-} else {
-    // 英語版：CartoDBのシンプルな地図
-    tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-    attribution = '© OpenStreetMap contributors © CARTO';
-}
+L.tileLayer(tileUrl, { 
+    attribution: attribution,
+    maxZoom: 18
+}).addTo(map);
 
-L.tileLayer(tileUrl, { attribution: attribution }).addTo(map);
-
-// --- グローバル変数（データを一時保存する場所） ---
-let allLocations = [];
+// --- データの管理 ---
+let allLocations = []; 
+let isDetailView = false; // 詳細表示中かどうかを管理するフラグ
 
 /**
- * 右側のパネルを「一覧表示」に戻す関数
+ * 右側のパネルを「今見えている範囲のリスト」に書き換える
  */
-function showDefaultList() {
+function updateVisibleList() {
+    // 詳細を表示している最中（カード表示中）なら、リストの更新を中止する
+    if (isDetailView) return;
+
     const infoContent = document.getElementById('info-content');
-    const listTitle = (currentLang === 'ja') ? '生息地一覧' : 'Habitat List';
-    
-    let html = `<h3>${listTitle}</h3><ul id="location-list">`;
-    
-    // 保存しておいた全データをリスト形式で表示
-    allLocations.forEach((loc, index) => {
-        const name = (currentLang === 'ja') ? loc.name_ja : loc.name_en;
-        html += `<li onclick="focusMarker(${index})">${name}</li>`;
+    if (!infoContent) return;
+
+    const listTitle = (currentLang === 'ja') ? 'このエリアの生息地' : 'Habitats in this area';
+    const bounds = map.getBounds();
+
+    // 現在の表示範囲に含まれるデータだけを抽出
+    const visibleLocations = allLocations.filter(loc => {
+        return bounds.contains([loc.lat, loc.lng]);
     });
+
+    let html = `<h3>${listTitle}</h3>`;
     
-    html += `</ul>`;
+    if (visibleLocations.length === 0) {
+        html += `<p style="color:#999; font-size:0.9rem;">${(currentLang === 'ja' ? 'この付近にデータはありません' : 'No data in this area')}</p>`;
+    } else {
+        html += `<ul id="location-list">`;
+        visibleLocations.forEach((loc) => {
+            const name = (currentLang === 'ja') ? loc.name_ja : loc.name_en;
+            // 名前の中にシングルクォートがあっても壊れないようにエスケープ
+            const safeName = name.replace(/'/g, "\\'");
+            html += `<li onclick="showDetailsFromName('${safeName}')">${name}</li>`;
+        });
+        html += `</ul>`;
+    }
+    
     infoContent.innerHTML = html;
 }
 
 /**
- * リストをクリックした時にその場所へ移動する（おまけ機能）
+ * 【新機能】リストから名前で検索して詳細を表示し、地図上の吹き出しも強制的に開く
  */
-function focusMarker(index) {
-    const loc = allLocations[index];
-    map.flyTo([loc.lat, loc.lng], 16);
-    // 擬似的にピンをクリックした状態にして詳細を出す
-    showDetails(loc);
+window.showDetailsFromName = function(name) {
+    const loc = allLocations.find(l => (l.name_ja === name || l.name_en === name));
+    if (loc) {
+        isDetailView = true; 
+        map.panTo([loc.lat, loc.lng]); 
+
+        // 地図上の全レイヤーから一致するマーカーを探して、吹き出しを開く
+        map.eachLayer(function(layer) {
+            if (layer instanceof L.Marker) {
+                const latLng = layer.getLatLng();
+                if (latLng.lat === loc.lat && latLng.lng === loc.lng) {
+                    layer.openPopup(); 
+                }
+            }
+        });
+
+        showDetails(loc); 
+    }
+};
+
+/**
+ * 右側のパネルに「詳細情報カード」を表示する
+ */
+function showDetails(loc) {
+    isDetailView = true; 
+    const infoContent = document.getElementById('info-content');
+    const name = (currentLang === 'ja') ? loc.name_ja : loc.name_en;
+    const desc = (currentLang === 'ja') ? loc.desc_ja : loc.desc_en;
+    const btnLabel = (currentLang === 'ja') ? '詳細サイトへ移動' : 'Visit Detail Site';
+
+    let html = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <span style="background:#e67e22; color:white; padding:2px 8px; border-radius:4px; font-size:0.8rem;">Data Card</span>
+            <button onclick="closeDetails()" style="cursor:pointer; font-size:28px; border:none; background:none; color:#999;">&times;</button>
+        </div>
+        <h4>${name}</h4>
+        <p style="white-space: pre-wrap;">${desc}</p>
+    `;
+
+    if (loc.url && loc.url !== "") {
+        html += `
+            <a href="${loc.url}" target="_blank" rel="noopener noreferrer" 
+               style="display:block; background:#e67e22; color:white; text-align:center; padding:12px; border-radius:8px; text-decoration:none; font-weight:bold; margin-top:20px;">
+               ${btnLabel}
+            </a>
+        `;
+    }
+    infoContent.innerHTML = html;
 }
 
 /**
- * 右側のパネルに「詳細情報」を表示する関数
+ * 詳細を閉じてリストに戻る（地図の吹き出しも閉じる）
  */
-function showDetails(loc) {
-    const infoContent = document.getElementById('info-content');
-    const detailHeader = (currentLang === 'ja') ? '調査レポート' : 'Research Report';
-    const name = (currentLang === 'ja') ? loc.name_ja : loc.name_en;
-    const desc = (currentLang === 'ja') ? loc.desc_ja : loc.desc_en;
+window.closeDetails = function() {
+    isDetailView = false; 
+    map.closePopup(); // 地図上の吹き出しを閉じる
+    updateVisibleList(); // リスト表示に更新
+};
 
-    infoContent.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <span style="background:#e67e22; color:white; padding:2px 8px; border-radius:4px; font-size:0.8rem;">Data Card</span>
-            <button onclick="showDefaultList()" style="cursor:pointer; font-size:28px; border:none; background:none; color:#999;">&times;</button>
-        </div>
-        <h4>${name}</h4>
-        <div class="description-area">
-            ${desc}
-        </div>
-        <hr style="border:0; border-top:1px dashed #ccc; margin:20px 0;">
-        <p style="font-size:0.8rem; color:#999;">
-            Location: ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}
-        </p>
-    `;
-}
-// 3. CSVファイルを読み込んでピンを立てる
+// 3. CSVファイルを読み込んで処理する
 fetch('../../assets/data/zarigani.csv')
     .then(response => response.text())
     .then(csvData => {
         const rows = csvData.trim().split('\n');
-        
-        // CSVの各行をループで処理
         for (let i = 1; i < rows.length; i++) {
             const columns = rows[i].split(',');
-            if (columns.length < 4) continue;
+            if (columns.length < 6) continue;
 
             const locData = {
-                name_ja: columns[0],
-                name_en: columns[1],
+                name_ja: columns[0].trim(),
+                name_en: columns[1].trim(),
                 lat: parseFloat(columns[2]),
                 lng: parseFloat(columns[3]),
-                desc_ja: columns[4],
-                desc_en: columns[5]
+                desc_ja: columns[4].trim(),
+                desc_en: columns[5].trim(),
+                url: columns[6] ? columns[6].trim() : ""
             };
 
-            // データを配列に保存
             allLocations.push(locData);
 
-            // マップにピンを立てる
+            // マーカー作成
             const marker = L.marker([locData.lat, locData.lng]).addTo(map);
+
+            // ポップアップ（吹き出し）の内容作成
+            const name = (currentLang === 'ja') ? locData.name_ja : locData.name_en;
+            const desc = (currentLang === 'ja') ? locData.desc_ja : locData.desc_en;
+            const popupLabel = (currentLang === 'ja') ? '詳細サイトへ' : 'Visit Site';
+            const shortDesc = desc.length > 30 ? desc.substring(0, 30) + "..." : desc;
+
+            let popupHtml = `
+                <div style="min-width: 150px;">
+                    <b style="font-size: 1.1rem; color: #e67e22;">${name}</b><br>
+                    <p style="margin: 5px 0; font-size: 0.9rem; line-height: 1.4;">${shortDesc}</p>
+            `;
+
+            if (locData.url) {
+                popupHtml += `
+                    <a href="${locData.url}" target="_blank" rel="noopener noreferrer" 
+                       style="color: #e67e22; font-weight: bold; text-decoration: underline;">
+                       ${popupLabel}
+                    </a>
+                `;
+            }
+            popupHtml += `</div>`;
+
+            marker.bindPopup(popupHtml);
             
-            // ピンをクリックした時のイベント
+            // 【iPad/スマホ対応】吹き出しが閉じられた時の連動
+            marker.on('popupclose', function() {
+                setTimeout(() => {
+                    let isOpen = false;
+                    map.eachLayer(function(layer) {
+                        if (layer instanceof L.Popup && map.hasLayer(layer)) {
+                            isOpen = true;
+                        }
+                    });
+                    // 他に開いているポップアップがなければ、パネルをリストに戻す
+                    if (!isOpen) {
+                        closeDetails();
+                    }
+                }, 200); 
+            });
+            // ピンをクリックした時に右パネルも連動
             marker.on('click', () => {
                 showDetails(locData);
             });
         }
-
-        // 全データの読み込みが終わったら、最初に「一覧」を表示する
-        showDefaultList();
-    })
-    .catch(error => {
-        console.error('CSVの読み込みに失敗しました:', error);
-        document.getElementById('info-content').innerHTML = "Failed to load data.";
+         // 初回読み込み完了後にリストを表示
+        updateVisibleList(); 
     });
+/**
+ * 4. 地図が動いた時にリストを更新する（移動終了イベント）
+ */
+map.on('moveend', updateVisibleList);

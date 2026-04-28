@@ -1,100 +1,189 @@
-/* 1. 画面全体の土台（スクロールさせない） */
+* {
+    box-sizing: border-box;
+}
+
+/* 1. 全体の設定 */
 body {
+    font-family: 
+        "BIZ UDPGothic", 
+        "Hiragino Sans", 
+        "Hiragino Kaku Gothic ProN", 
+        "Noto Sans JP", 
+        "Meiryo", 
+        sans-serif;
     margin: 0;
-    padding: 0;
     display: flex;
     flex-direction: column;
-    height: 100vh; /* 画面の高さ100% */
+    height: 100vh;
     overflow: hidden;
-    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* 2. ヘッダー */
+/* 2. タイトルの設定 */
+h1, h3, h4 {
+    font-family: inherit;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* --- PC版：1行に制限する設定 --- */
+h1 {
+    white-space: nowrap;     /* 折り返しを禁止 */
+    overflow: hidden;        /* はみ出た分を隠す */
+    text-overflow: ellipsis; /* 長すぎる場合は末尾を「...」に */
+    max-width: 60%;          /* メニュー用のスペースを確保 */
+}
+
 header {
-    background-color: #e67e22; /* ザリガニオレンジ */
+    background-color: #e67e22;
     color: white;
     padding: 10px 20px;
-    flex-shrink: 0; /* 高さを固定 */
-    z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    flex-shrink: 0;
+    height: 60px;            /* PC版のヘッダー高さを固定 */
 }
 
-header h1 {
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    max-width: 100%;
+}
+
+.header-nav ul {
+    display: flex;
+    list-style: none;
     margin: 0;
-    font-size: 1.5rem;
+    padding: 0;
+    gap: 15px;
+    flex-wrap: nowrap;       /* メニューを1行に強制 */
 }
 
-/* 3. メインコンテンツ（マップとパネルを包む箱） */
+.header-nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    white-space: nowrap;     /* ボタン内の文字も改行させない */
+}
+
+/* 3. メインコンテンツの設定 */
 .main-container {
     display: flex;
-    flex-direction: row; /* パソコンでは横並び */
-    flex-grow: 1;        /* 残りの高さを全部使う */
+    flex-direction: row;
+    flex-grow: 1;
     overflow: hidden;
 }
 
-/* 4. マップの基本設定（共通） */
 #map {
     flex-basis: 66.6%;
     width: 66.6%;
     height: 100%;
-    filter: grayscale(0.4) sepia(0.05) saturate(2.2) brightness(1.1) contrast(1.1);
 }
 
-/* 5. 日本語版 (lang="ja") の時だけ、水場を強調するフィルターをかける */
-html[lang="ja"] #map {
-    filter: brightness(1.05) contrast(1.1) saturate(1.5);
-}
-
-/* 6. 英語版 (lang="en") の時は、フィルターをかけない（自然なOSMのまま） */
-html[lang="en"] #map {
-    filter: none;
-}
-
-/* 5. 右側データパネル（1/3の幅） */
 #data-panel {
-    flex-basis: 33.3%;
-    width: 33.3%;
-    background-color: #fff;
-    padding: 20px;
-    overflow-y: auto; /* 中身が増えたらここだけスクロール */
-    border-left: 3px solid #e67e22;
-    box-sizing: border-box;
+    flex-basis: 33.4%;
+    width: 33.4%;
+    padding: 25px;
+    background: #fff;
+    overflow-y: auto;
+    line-height: 1.8;
+    border-left: 1px solid #ddd;
 }
 
-/* 6. リストの見た目（生息地一覧用） */
-#location-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+/* 4. データ表示エリアの装飾 */
+#info-content h4 {
+    font-size: 1.4rem;
+    color: #333;
+    margin: 10px 0;
+    border-bottom: 2px solid #e67e22;
+    padding-bottom: 5px;
 }
 
-#location-list li {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-    transition: background-color 0.2s;
+#info-content p {
+    font-size: 1rem;
+    color: #444;
+    white-space: pre-wrap;
+    margin-bottom: 20px;
 }
 
-#location-list li:hover {
-    background-color: #fdf2e9;
-}
+#location-list { list-style: none; padding: 0; }
+#location-list li { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; }
+#location-list li:hover { background-color: #fdf2e9; }
 
-/* 7. 【スマホ・縦画面用】の切り替え設定 */
+.subtitle {
+    font-size: 0.9rem;
+    font-weight: normal;
+    margin-left: 10px;
+    color: #ffe0b2;
+}
+/* -------------------------------------------
+    スマホ対応 (画面幅が768px以下の時)
+------------------------------------------- */
 @media (max-width: 768px) {
-    .main-container {
-        flex-direction: column; /* スマホでは縦並び */
+    header {
+        padding: 8px 15px; /* 左右の余白を少し調整 */
+        height: auto;
+        max-height: 100px;
+        overflow: hidden;
     }
-    
-    #map {
-        flex-basis: 50%; /* 上半分 */
-        width: 100%;
+
+    .header-inner {
+        flex-direction: column; 
+        align-items: flex-start; /* 【追加】中身をすべて左揃えにする */
+        gap: 6px;
     }
-    
-    #data-panel {
-        flex-basis: 50%; /* 下半分 */
-        width: 100%;
-        border-left: none;
-        border-top: 3px solid #e67e22;
+
+    .pc-only {
+        display: none;
+    }
+
+    h1 {
+        font-size: 1.1rem;
+        max-width: 100%;
+        text-align: left; /* 【修正】タイトルを左揃えに */
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        white-space: normal;
+    }
+
+    .subtitle {
+        display: none;
+    }
+
+    /* メニュー段：2列まで。ここも左揃えに変更 */
+    .header-nav ul {
+        flex-wrap: wrap;
+        justify-content: flex-start; /* 【修正】ボタンを左から並べる */
+        gap: 6px 8px; /* ボタン同士の間隔を少し調整 */
+        max-height: 45px;
+        overflow: hidden;
+    }
+
+    .header-nav a {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+
+    /* 以下、メインエリアの設定はそのまま */
+    .main-container { 
+        flex-direction: column; 
+    }
+    #map { 
+        flex-basis: 40vh; 
+        width: 100%; 
+    }
+    #data-panel { 
+        flex-basis: 60vh; 
+        width: 100%; 
+        border-left: none; 
+        border-top: 2px solid #e67e22; 
+        padding: 15px;
     }
 }
 /* 地図上のピン（マーカー）だけ色を変える魔法 */

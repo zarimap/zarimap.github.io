@@ -1,0 +1,2 @@
+User-agent: *
+Sitemap: https://zarimap.github.io/sitemap.xml
