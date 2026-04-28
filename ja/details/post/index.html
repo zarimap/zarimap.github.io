@@ -86,20 +86,19 @@
             border-radius: 3px;
             cursor: pointer;
             font-weight: bold;
+            
             /* 投稿ページ専用のスクロール復活設定 */
-html, body {
-    height: auto !important;   /* 高さを固定しない */
-    overflow: visible !important; /* はみ出し（スクロール）を許可 */
-}
-
-body {
-    display: block; /* Flexboxによる固定解除 */
-}
-
-.post-container {
-    margin-bottom: 50px; /* 一番下のボタンが隠れないように余白を追加 */
-}
+        html, body {
+            height: auto !important;   /* 高さを固定しない */
+            overflow: visible !important; /* はみ出し（スクロール）を許可 */
         }
+        body {
+            display: block; /* Flexboxによる固定解除 */
+        }
+        .post-container {
+            margin-bottom: 50px; /* 一番下のボタンが隠れないように余白を追加 */
+        }
+    }
     </style>
 </head>
 <body>
