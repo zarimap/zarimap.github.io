@@ -127,7 +127,7 @@ header {
 @media (max-width: 768px) {
     header {
         padding: 8px 15px; /* 左右の余白を少し調整 */
-        height: auto !important;
+        height: auto;
         max-height: 100px;
         overflow: hidden;
     }
