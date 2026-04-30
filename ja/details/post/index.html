@@ -192,6 +192,68 @@ body {
         }).addTo(map);
 
         let marker;
+        // 現在地取得ボタンの処理
+document.getElementById('current-location-btn').addEventListener('click', function() {
+    // ブラウザが位置情報に対応しているかチェック
+    if (!navigator.geolocation) {
+        alert("お使いのブラウザは位置情報に対応していません。");
+        return;
+    }
+
+    const btn = this;
+    btn.innerText = "取得中...";
+    btn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const lat = position.coords.latitude.toFixed(6);
+            const lng = position.coords.longitude.toFixed(6);
+            const latlng = [lat, lng];
+
+            // 1. 地図を現在地に移動（ズームレベルも上げる）
+            map.setView(latlng, 16);
+
+            // 2. フォームに座標を代入
+            document.getElementById('lat').value = lat;
+            document.getElementById('lng').value = lng;
+
+            // 3. ピンを立てる（既存のクリック処理と同じポップアップを作成）
+            const popupHtml = `
+                <div class="popup-form-container">
+                    <b>📍 現在地の情報入力</b>
+                    <label style="font-size:10px">場所名</label>
+                    <input type="text" id="pop_place" class="popup-input" placeholder="ここになまえを入力">
+                    <label style="font-size:10px">座標</label>
+                    <div style="font-size:11px; background:#f0f0f0; padding:3px; margin-bottom:8px;">
+                        ${lat}, ${lng}
+                    </div>
+                    <label style="font-size:10px">説明</label>
+                    <textarea id="pop_desc" class="popup-input" style="height:50px;" placeholder="簡単な説明"></textarea>
+                    <button type="button" class="popup-sync-btn" onclick="syncData()">下のフォームに反映</button>
+                </div>
+            `;
+
+            if (marker) {
+                marker.setLatLng(latlng).setPopupContent(popupHtml).openPopup();
+            } else {
+                marker = L.marker(latlng).addTo(map).bindPopup(popupHtml).openPopup();
+            }
+
+            btn.innerText = "📍 現在地を取得";
+            btn.disabled = false;
+        },
+        function(error) {
+            alert("位置情報の取得に失敗しました。設定を確認してください。");
+            btn.innerText = "📍 現在地を取得";
+            btn.disabled = false;
+        },
+        {
+            enableHighAccuracy: true, // 高精度なGPS情報を使用
+            timeout: 10000,           // 10秒でタイムアウト
+            maximumAge: 0             // キャッシュを使わない
+        }
+    );
+});
 
         // 地図をクリックした時の処理
         map.on('click', function(e) {
