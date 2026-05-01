@@ -6,6 +6,57 @@
 // 1. 地図の初期設定
 const map = L.map('map').setView([35.6895, 139.6917], 15);
 
+// 現在地を表示するためのレイヤーグループ（ボタンを押すごとに更新するため）
+let locationLayer = L.layerGroup().addTo(map);
+
+document.getElementById('locate-btn').addEventListener('click', function() {
+    if (!navigator.geolocation) {
+        alert("お使いのブラウザは位置情報に対応していません。");
+        return;
+    }
+
+    const btn = this;
+    btn.innerText = "探索中...";
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const latlng = [lat, lng];
+
+            // 前の現在地マークを消去
+            locationLayer.clearLayers();
+
+            // 1. 地図を移動（ズーム13は市街地全体が見渡せるくらい）
+            map.setView(latlng, 13);
+
+            // 2. 現在地に「自分はここ」という青い円を表示
+            L.circle(latlng, {
+                radius: 200,      // 半径200m
+                color: '#3498db', // 枠線の色
+                fillColor: '#3498db',
+                fillOpacity: 0.4
+            }).addTo(locationLayer);
+
+            // 青いピンも立てる
+            L.marker(latlng, {
+                icon: L.divIcon({
+                    className: 'my-location-icon',
+                    html: '<div style="background:#3498db; width:12px; height:12px; border:2px solid white; border-radius:50%;"></div>',
+                    iconSize: [12, 12]
+                })
+            }).addTo(locationLayer);
+
+            btn.innerText = "🔍 近くのザリガニを探す";
+        },
+        function(error) {
+            alert("位置情報の取得に失敗しました。");
+            btn.innerText = "🔍 近くのザリガニを探す";
+        },
+        { enableHighAccuracy: true }
+    );
+});
+
 // 2. 背景タイルの設定
 const tileUrl = 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png';
 const attribution = '© 国土地理院';
