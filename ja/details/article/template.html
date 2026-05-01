@@ -1,1 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スポット詳細 - ザリマップ</title>
+    <!-- 共通のスタイルシート -->
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* 詳細ページ専用のスタイル */
+        .detail-hero {
+            width: 100%;
+            height: 300px;
+            background-color: #ddd;
+            background-image: url('images/main.jpg'); /* 各ページで画像を差し替え */
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
 
+        .detail-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            background: #e67e22;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .detail-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin: 0 0 15px 0;
+            border-left: 5px solid #e67e22;
+            padding-left: 15px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 10px;
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #e67e22;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:before {
+            content: "← ";
+        }
+
+        /* スマホ対応：投稿ページと同じくスクロールを許可 */
+        html, body {
+            height: auto !important;
+            overflow: visible !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-inner">
+            <h1>
+                <a href="../../../index.html" style="color: inherit; text-decoration: none;">
+                    ザリマップ <span class="subtitle">詳細情報</span>
+                </a>
+            </h1>
+            <nav class="header-nav">
+                <ul>
+                    <li><a href="../../index.html">マップに戻る</a></li>
+                    <li><a href="../post/index.html">情報を投稿</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container" style="display: block; padding: 20px; max-width: 800px; margin: 0 auto;">
+        
+        <a href="../../ja/map/index.html" class="back-link">マップへ戻る</a>
+
+        <article class="detail-card">
+            <!-- メイン写真（なければdivを消すか背景色だけに） -->
+            <div class="detail-hero"></div>
+
+            <span class="category-tag">生息地情報</span>
+            <h2 class="detail-title">ここに場所の名前が入ります</h2>
+            
+            <p class="detail-description" style="line-height: 1.8; color: #34495e;">
+                ここには詳しい説明文が入ります。スプレッドシートに書ききれなかった、具体的な捕まえ方のコツや、足場の状況（サンダルでOKか、長靴が必要か）などを自由に記述できます。
+            </p>
+
+            <div class="info-grid">
+                <div class="info-label">座標</div>
+                <div class="info-value">35.XXXX, 139.XXXX</div>
+
+                <div class="info-label">確認時期</div>
+                <div class="info-value">2026年5月頃</div>
+
+                <div class="info-label">種類</div>
+                <div class="info-value">アメリカザリガニ</div>
+            </div>
+        </article>
+
+        <section class="detail-card">
+            <h3 style="margin-top: 0;">現地写真</h3>
+            <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;">
+                <!-- 写真を並べるイメージ -->
+                <div style="min-width: 150px; height: 150px; background: #eee; border-radius: 8px;"></div>
+                <div style="min-width: 150px; height: 150px; background: #eee; border-radius: 8px;"></div>
+                <div style="min-width: 150px; height: 150px; background: #eee; border-radius: 8px;"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer style="text-align: center; padding: 40px 0; color: #95a5a6; font-size: 0.9rem;">
+        &copy; 2026 Zarimap Project
+    </footer>
+
+</body>
+</html>
