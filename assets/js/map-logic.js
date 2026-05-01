@@ -6,58 +6,65 @@
 // 1. 地図の初期設定
 const map = L.map('map').setView([35.6895, 139.6917], 15);
 
+// --- 現在地ボタンの統合処理 ---
+const locateBtn = document.getElementById('locate-btn');
 // 現在地を表示するためのレイヤーグループ（ボタンを押すごとに更新するため）
 let locationLayer = L.layerGroup().addTo(map);
 
-document.getElementById('locate-btn').addEventListener('click', function() {
-    if (!navigator.geolocation) {
-        alert("お使いのブラウザは位置情報に対応していません。");
-        return;
-    }
+if (locateBtn) {
+    // ボタンをクリックしたときに地図のイベント（クリックでピンを立てる等）が発火するのを防ぐ
+    L.DomEvent.disableClickPropagation(locateBtn);
 
-    const btn = this;
-    btn.innerText = "探索中...";
+    locateBtn.addEventListener('click', function() {
+        if (!navigator.geolocation) {
+            alert("お使いのブラウザは位置情報に対応していません。");
+            return;
+        }
 
-    navigator.geolocation.getCurrentPosition(
-        function(position) {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            const latlng = [lat, lng];
+        const btn = this;
+        btn.innerText = "探索中...";
 
-            // 前の現在地マークを消去
-            locationLayer.clearLayers();
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const latlng = [lat, lng];
 
-            // 1. 地図を移動（ズーム13は市街地全体が見渡せるくらい）
-            map.setView(latlng, 13);
+                // 前の現在地マークを消去
+                locationLayer.clearLayers();
 
-            // 2. 現在地に「自分はここ」という青い円を表示
-            L.circle(latlng, {
-                radius: 200,      // 半径200m
-                color: '#3498db', // 枠線の色
-                fillColor: '#3498db',
-                fillOpacity: 0.4
-            }).addTo(locationLayer);
+                // 1. 地図を移動（ズーム13は市街地全体が見渡せるくらい）
+                map.setView(latlng, 13);
 
-            // 青いピンも立てる
-            L.marker(latlng, {
-                icon: L.divIcon({
-                    className: 'my-location-icon',
-                    html: '<div style="background:#3498db; width:12px; height:12px; border:2px solid white; border-radius:50%;"></div>',
-                    iconSize: [12, 12]
-                })
-            }).addTo(locationLayer);
+                // 2. 現在地に「自分はここ」という青い円を表示
+                L.circle(latlng, {
+                    radius: 200,      // 半径200m
+                    color: '#3498db', // 枠線の色
+                    fillColor: '#3498db',
+                    fillOpacity: 0.4
+                }).addTo(locationLayer);
 
-            btn.innerText = "🔍 近くのザリガニを探す";
-        },
-        function(error) {
-            alert("位置情報の取得に失敗しました。");
-            btn.innerText = "🔍 近くのザリガニを探す";
-        },
-        { enableHighAccuracy: true }
-    );
-});
+                // 青いピンも立てる
+                L.marker(latlng, {
+                    icon: L.divIcon({
+                        className: 'my-location-icon',
+                        html: '<div style="background:#3498db; width:12px; height:12px; border:2px solid white; border-radius:50%;"></div>',
+                        iconSize: [12, 12]
+                    })
+                }).addTo(locationLayer);
 
-// 2. 背景タイルの設定
+                btn.innerText = "🔍 近くのザリガニを探す";
+            },
+            function(error) {
+                alert("位置情報の取得に失敗しました。");
+                btn.innerText = "🔍 近くのザリガニを探す";
+            },
+            { enableHighAccuracy: true }
+        );
+    });
+}
+
+// 2. 背景タイルの設定（国土地理院タイル）
 const tileUrl = 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png';
 const attribution = '© 国土地理院';
 
@@ -74,7 +81,6 @@ let isDetailView = false; // 詳細表示中かどうかを管理するフラグ
  * 右側のパネルを「今見えている範囲のリスト」に書き換える
  */
 function updateVisibleList() {
-    // 詳細を表示している最中（カード表示中）なら、リストの更新を中止する
     if (isDetailView) return;
 
     const infoContent = document.getElementById('info-content');
@@ -83,7 +89,6 @@ function updateVisibleList() {
     const listTitle = (currentLang === 'ja') ? 'このエリアの生息地' : 'Habitats in this area';
     const bounds = map.getBounds();
 
-    // 現在の表示範囲に含まれるデータだけを抽出
     const visibleLocations = allLocations.filter(loc => {
         return bounds.contains([loc.lat, loc.lng]);
     });
@@ -96,7 +101,6 @@ function updateVisibleList() {
         html += `<ul id="location-list">`;
         visibleLocations.forEach((loc) => {
             const name = (currentLang === 'ja') ? loc.name_ja : loc.name_en;
-            // 名前の中にシングルクォートがあっても壊れないようにエスケープ
             const safeName = name.replace(/'/g, "\\'");
             html += `<li onclick="showDetailsFromName('${safeName}')">${name}</li>`;
         });
@@ -107,7 +111,7 @@ function updateVisibleList() {
 }
 
 /**
- * 【新機能】リストから名前で検索して詳細を表示し、地図上の吹き出しも強制的に開く
+ * リストから名前で検索して詳細を表示し、地図上の吹き出しも開く
  */
 window.showDetailsFromName = function(name) {
     const loc = allLocations.find(l => (l.name_ja === name || l.name_en === name));
@@ -115,7 +119,6 @@ window.showDetailsFromName = function(name) {
         isDetailView = true; 
         map.panTo([loc.lat, loc.lng]); 
 
-        // 地図上の全レイヤーから一致するマーカーを探して、吹き出しを開く
         map.eachLayer(function(layer) {
             if (layer instanceof L.Marker) {
                 const latLng = layer.getLatLng();
@@ -160,12 +163,12 @@ function showDetails(loc) {
 }
 
 /**
- * 詳細を閉じてリストに戻る（地図の吹き出しも閉じる）
+ * 詳細を閉じてリストに戻る
  */
 window.closeDetails = function() {
     isDetailView = false; 
-    map.closePopup(); // 地図上の吹き出しを閉じる
-    updateVisibleList(); // リスト表示に更新
+    map.closePopup(); 
+    updateVisibleList(); 
 };
 
 // 3. CSVファイルを読み込んで処理する
@@ -189,10 +192,8 @@ fetch('../../assets/data/zarigani.csv')
 
             allLocations.push(locData);
 
-            // マーカー作成
             const marker = L.marker([locData.lat, locData.lng]).addTo(map);
 
-            // ポップアップ（吹き出し）の内容作成
             const name = (currentLang === 'ja') ? locData.name_ja : locData.name_en;
             const desc = (currentLang === 'ja') ? locData.desc_ja : locData.desc_en;
             const popupLabel = (currentLang === 'ja') ? '詳細サイトへ' : 'Visit Site';
@@ -216,7 +217,6 @@ fetch('../../assets/data/zarigani.csv')
 
             marker.bindPopup(popupHtml);
             
-            // 【iPad/スマホ対応】吹き出しが閉じられた時の連動
             marker.on('popupclose', function() {
                 setTimeout(() => {
                     let isOpen = false;
@@ -225,21 +225,18 @@ fetch('../../assets/data/zarigani.csv')
                             isOpen = true;
                         }
                     });
-                    // 他に開いているポップアップがなければ、パネルをリストに戻す
                     if (!isOpen) {
                         closeDetails();
                     }
                 }, 200); 
             });
-            // ピンをクリックした時に右パネルも連動
+
             marker.on('click', () => {
                 showDetails(locData);
             });
         }
-         // 初回読み込み完了後にリストを表示
         updateVisibleList(); 
     });
-/**
- * 4. 地図が動いた時にリストを更新する（移動終了イベント）
- */
+
+// 4. 地図が動いた時にリストを更新する
 map.on('moveend', updateVisibleList);
