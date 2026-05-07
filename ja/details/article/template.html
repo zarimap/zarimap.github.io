@@ -89,7 +89,7 @@
         const spotId = parseInt(urlParams.get('id')) || 0;
 
         // CSVの読み込み
-        fetch('details.csv')
+        fetch('../../../assets/data/zarigani.csv')
             .then(res => res.text())
             .then(csvData => {
                 const rows = csvData.trim().split('\n');
