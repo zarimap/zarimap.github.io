@@ -118,16 +118,19 @@
                     document.getElementById('disp-period').innerText = target[9] || "不明";
                     document.getElementById('disp-type').innerText = target[10] || "不明";
                     
-                    // --- Googleマップの埋め込み処理 ---
-                    const address = target[8]; // 住所がCSVの9列目(index:8)にある場合
+                    // --- Googleマップの埋め込み処理（座標版） ---
+                    const lat = target[0]; // 緯度の列番号
+                    const lng = target[1]; // 経度の列番号
                     const mapIframe = document.getElementById('disp-map');
-                    if (address && address !== "不明") {
-                        // 住所をURLエンコードして埋め込みURLを作成
-                        const mapUrl = `https://www.google.com/maps?output=embed&q=${encodeURIComponent(address)}&z=15`;
+                    if (lat && lng) {
+                        // 緯度と経度をカンマで結合する
+                        const coordinate = lat + "," + lng;
+                        // 地図のURLを作成
+                        const mapUrl = `https://www.google.com/maps?output=embed&q=${encodeURIComponent(coordinate)}&z=17`;
                         mapIframe.src = mapUrl;
                         mapIframe.style.display = 'block';
                     } else {
-                        mapIframe.style.display = 'none'; // 住所がない場合は地図を隠す
+                        mapIframe.style.display = 'none';
                     }
 
                     // 写真URLの取得（CSVの6列目：インデックス5）
