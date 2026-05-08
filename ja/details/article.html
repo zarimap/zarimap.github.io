@@ -72,6 +72,19 @@
                     <div class="info-label">種類</div>
                     <div class="info-value" id="disp-type">---</div>
                 </div>
+                <!-- 地図表示エリア -->
+                <div style="margin-top: 20px;">
+                    <iframe
+                        id="disp-map"
+                        width="100%"
+                        height="300"
+                        style="border:0; border-radius: 12px;"
+                        loading="lazy"
+                        allowfullscreen
+                        referrerpolicy="no-referrer-when-downgrade"
+                        src="">
+                    </iframe>
+                </div>
             </article>
         </div>
     </main>
@@ -104,6 +117,18 @@
                     document.getElementById('disp-address').innerText = target[8] || "不明";
                     document.getElementById('disp-period').innerText = target[9] || "不明";
                     document.getElementById('disp-type').innerText = target[10] || "不明";
+                    
+                    // --- Googleマップの埋め込み処理 ---
+                    const address = target[8]; // 住所がCSVの9列目(index:8)にある場合
+                    const mapIframe = document.getElementById('disp-map');
+                    if (address && address !== "不明") {
+                        // 住所をURLエンコードして埋め込みURLを作成
+                        const mapUrl = `https://www.google.com/maps?output=embed&q=${encodeURIComponent(address)}&z=15`;
+                        mapIframe.src = mapUrl;
+                        mapIframe.style.display = 'block';
+                    } else {
+                        mapIframe.style.display = 'none'; // 住所がない場合は地図を隠す
+                    }
 
                     // 写真URLの取得（CSVの6列目：インデックス5）
                     const photoUrl = target[5];
