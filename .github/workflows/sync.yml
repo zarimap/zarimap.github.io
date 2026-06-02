@@ -10,20 +10,18 @@ jobs:
   copy-to-another-repo:
     runs-on: ubuntu-latest
     steps:
-      # 1. コピー元のファイルをチェックアウト
       - name: Checkout source repository
         uses: actions/checkout@v4
 
-      # 2. トークンを使って zaritsuri.com に強制上書きコピー
       - name: Pushes to another repository
         uses: s0/git-publish-subdir-action@v2.6.0
         env:
-          # 今お使いのトークンをそのまま使えます
-          # 💡 URLの部分（zarimap/zaritsuri.com）が合っているか念のため確認してください
+          # トークンだけは env で渡します
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          # エラーが出ないよう、設定をすべて with の中にまとめました
           REPO: github.com/zarimap/zaritsuri.com.git
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }} # トークンはここに渡します
-          # コピー先の main ブランチにあるファイルを一度すべて削除する設定
+          BRANCH: 'main'  # 💡これで確実に「BRANCHが指定されていない」エラーを防ぎます
+          FOLDER: '.'
           CLEAR_GLOBS: '*'
-          
-          # すでに main ブランチが存在しても、強制的に上書き（Force Push）する設定
           FORCE_TO_BRANCH: true
