@@ -16,12 +16,10 @@ jobs:
       - name: Pushes to another repository
         uses: s0/git-publish-subdir-action@v2.6.0
         env:
-          # トークンだけは env で渡します
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          # エラーが出ないよう、設定をすべて with の中にまとめました
-          REPO: github.com/zarimap/zaritsuri.com.git
-          BRANCH: 'main'  # 💡これで確実に「BRANCHが指定されていない」エラーを防ぎます
+          # 💡 すべての設定を env: の中に、シングルクォーテーション付きで正しく配置しました
+          REPO: 'github.com/zarimap/zaritsuri.com.git'
+          BRANCH: 'main'
           FOLDER: '.'
           CLEAR_GLOBS: '*'
-          FORCE_TO_BRANCH: true
+          FORCE_TO_BRANCH: 'true'
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
