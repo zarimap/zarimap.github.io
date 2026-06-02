@@ -30,7 +30,7 @@ jobs:
           destination_repo: 'zarimap/zaritsuri.com'
           
           # コピー先の対象ブランチ（例: main または gh-pages）
-          destination_folder: '' # コピー先のルートに置く場合は空欄
+          destination_folder: 'main' # コピー先のルートに置く場合は空欄
           user_email: 'github-actions[bot]@users.noreply.github.com'
           user_name: 'github-actions[bot]'
           commit_message: 'Auto-updated from source repository via GitHub Actions'
