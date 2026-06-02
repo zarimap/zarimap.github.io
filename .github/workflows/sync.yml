@@ -1,36 +1,31 @@
 name: Copy files to another repository
 
 on:
-  # mainブランチへのプッシュ（またはデプロイ）をトリガーにする場合
   push:
     branches:
       - main
-  # 手動で実行したい場合（テスト用）
   workflow_dispatch:
 
 jobs:
   copy-to-another-repo:
     runs-on: ubuntu-latest
     steps:
-      # 1. コピー元のリポジトリのコードをチェックアウト
+      # 1. コピー元のファイルをチェックアウト
       - name: Checkout source repository
         uses: actions/checkout@v4
 
-      # 2. 外部のアクションを使って、特定のフォルダやファイルをもう一方のリポジトリにコピー
+      # 2. トークンを使って zaritsuri.com に強制上書きコピー
       - name: Pushes to another repository
-        uses: dmnemec/copy_file_to_another_repo_action@main
+        uses: s0/git-publish-subdir-action@v2.6.0
         env:
-          # ステップ2で設定したシークレットトークン
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          # コピーしたいファイルやフォルダのパス（リポジトリ全体なら「.」）
-          source_file: '.' 
+          # 今お使いのトークンをそのまま使えます
+          # 💡 URLの部分（zarimap/zaritsuri.com）が合っているか念のため確認してください
+          REPO: https://x-access-token:${{ secrets.API_TOKEN_GITHUB }}@github.com/zarimap/zaritsuri.com.git
+          BRANCH: main
+          FOLDER: .
           
-          # コピー先（ターゲット）のユーザー名とリポジトリ名
-          destination_repo: 'zarimap/zaritsuri.com'
+          # コピー先の main ブランチにあるファイルを一度すべて削除する設定
+          CLEAR_GLOBS: '*'
           
-          # コピー先の対象ブランチ（例: main または gh-pages）
-          destination_folder: 'main' # コピー先のルートに置く場合は空欄
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          user_name: 'github-actions[bot]'
-          commit_message: 'Auto-updated from source repository via GitHub Actions'
+          # すでに main ブランチが存在しても、強制的に上書き（Force Push）する設定
+          FORCE_TO_BRANCH: true
