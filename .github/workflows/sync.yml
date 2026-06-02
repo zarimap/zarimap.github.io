@@ -1,0 +1,39 @@
+name: Copy files to another repository
+
+on:
+  push:
+    branches:
+      - main  # コピー元のmainブランチにプッシュされたら自動起動
+  workflow_dispatch: # 手動実行用ボタンも残しています
+
+jobs:
+  copy-to-another-repo:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. コピー元のリポジトリ（全ファイル）をチェックアウト
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+
+      # 2. zaritsuri.com リポジトリへ中身を丸ごと上書きコピー
+      - name: Pushes to another repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          # ステップ2で設定したシークレットトークン
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          # リポジトリの中身を丸ごとコピーするため「.」を指定
+          source-directory: '.'
+          
+          # コピー先（ターゲット）の組織名またはユーザー名とリポジトリ名
+          # 💡「あなたの組織名（またはユーザー名）」の部分だけ書き換えてください！
+          destination-github-username: 'zarimap'
+          destination-repository-name: 'zaritsuri.com'
+          
+          # コピー先の対象ブランチ
+          target-branch: 'main'
+          
+          # コピー先のファイルを一度全消ししてからコピーする設定（丸ごと同期）
+          create-target-branch-if-needed: true
+          
+          user-email: 'github-actions[bot]@users.noreply.github.com'
+          commit-message: 'Auto-updated from source repository via GitHub Actions'
