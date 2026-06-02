@@ -20,10 +20,8 @@ jobs:
         env:
           # 今お使いのトークンをそのまま使えます
           # 💡 URLの部分（zarimap/zaritsuri.com）が合っているか念のため確認してください
-          REPO: https://x-access-token:${{ secrets.API_TOKEN_GITHUB }}@github.com/zarimap/zaritsuri.com.git
-          BRANCH: main
-          FOLDER: .
-          
+          REPO: github.com/zarimap/zaritsuri.com.git
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }} # トークンはここに渡します
           # コピー先の main ブランチにあるファイルを一度すべて削除する設定
           CLEAR_GLOBS: '*'
           
