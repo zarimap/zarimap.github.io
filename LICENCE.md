@@ -13,7 +13,7 @@ Copyright (c) 2026 Zarimap project All Rights Reserved.
 "Copyright 2026 Zarimap project All Rights Reserved."<br>
 そのような場合は、連絡は不要です。<br><br>
 <ul>
-  <li><a href="README.md">README.md</a>もお読みください</li>
+  <li><a href="README.md/#日本語">README.md</a>もお読みください</li>
 </ul>
 
 ----------------------------------------------------------------------
