@@ -6,6 +6,45 @@
     <title>Zarimap - Crayfish Search Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="../assets/css/style.css" />
+    <style>
+        /* Styles for floating the button on the map */
+        #map-container {
+            position: relative;
+            flex: 1; /* Expands to fill the screen if the parent main-container is a Flexbox */
+            min-height: 400px; /* Adjust as needed */
+        }
+
+        #map {
+            height: 100%; /* Fill the container */
+            width: 100%;
+        }
+
+        .map-floating-btn {
+            position: absolute;
+            bottom: 20px;   /* 20px from bottom */
+            right: 20px;    /* 20px from right */
+            z-index: 1000;  /* Display in front of Leaflet map */
+            
+            padding: 12px 20px;
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .map-floating-btn:hover {
+            background-color: #d35400;
+            transform: scale(1.05);
+        }
+
+        .map-floating-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -28,7 +67,13 @@
     </header>
     
     <div class="main-container">
-        <div id="map"></div>
+        <div id="map-container">
+            <div id="map"></div>
+            
+            <button type="button" id="locate-btn" class="map-floating-btn">
+                🔍 Find Crayfish Nearby
+            </button>
+        </div>
 
         <div id="data-panel">
             <div id="info-content">
@@ -39,10 +84,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <script>const currentLang = 'en';</script>
-
     <script src="../assets/js/map-logic.js"></script>
-
 </body>
 </html>
