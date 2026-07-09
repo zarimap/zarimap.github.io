@@ -31,5 +31,5 @@ When reprinting, quoting, or utilizing the data, you must clearly display the fo
 "Copyright 2026 Zarimap project All Rights Reserved."<br>
 In such a case, you don't need to contact.<br><br>
 <ul>
-  <li>Please read <a href="README.md">README.md</a>, too.</li>
+  <li>Please read <a href="README.md/#English">README.md</a>, too.</li>
 </ul>
