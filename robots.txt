@@ -1,2 +1,2 @@
 User-agent: *
-Sitemap: https://zarimap.github.io/sitemap.txt
+Sitemap: https://maps.zaritsuri.com/sitemap.txt
