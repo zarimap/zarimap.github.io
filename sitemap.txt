@@ -1,4 +1,4 @@
-https://zarimap.github.io/
-https://zarimap.github.io/ja/map/
-https://zarimap.github.io/en/map/
-https://zarimap.github.io/details/article.html
+https://maps.zaritsuri.com/
+https://maps.zaritsuri.com/ja/
+https://maps.zaritsuri.com/en/
+https://maps.zaritsuri.com/details/article.html
