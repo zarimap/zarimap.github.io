@@ -17,8 +17,8 @@ Copyright ©︎ 2026 Zarimap project All Rights Reserved.
   <li><a href="README.md/#日本語">README.md</a>もお読みください</li>
 </ul>
 <br>
-最終更新:7/23
-----------------------------------------------------------------------
+最終更新:7/23<br>
+----------------------------------------------------------------------<br>
 # Licence
 [English]<br>
 All copyrights to the contents of this repository (including codes, data, documentation, etc.) belong to Zarimap project.<br><br>
