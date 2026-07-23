@@ -1,4 +1,4 @@
-Copyright (c) 2026 Zarimap project All Rights Reserved.
+Copyright ©︎ 2026 Zarimap project All Rights Reserved.
 
 # ライセンス
 [日本語]<br>
