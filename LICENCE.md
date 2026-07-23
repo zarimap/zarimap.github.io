@@ -11,12 +11,13 @@ Copyright ©︎ 2026 Zarimap project All Rights Reserved.
 3. 著作権表示（Copyright）を削除または変更すること。<br><br>
 
 転載、引用、またはデータの利用にあたっては、必ず以下の著作権表示を明記してください。<br>
-"Copyright 2026 Zarimap project All Rights Reserved."<br>
+"Copyright ©︎ 2026 Zarimap project All Rights Reserved."<br>
 そのような場合は、連絡は不要です。<br><br>
 <ul>
   <li><a href="README.md/#日本語">README.md</a>もお読みください</li>
 </ul>
-
+<br>
+最終更新:7/23
 ----------------------------------------------------------------------
 # Licence
 [English]<br>
@@ -29,8 +30,10 @@ Users are permitted to refer to and utilize the contents as data. However, the f
 3. Removal or alteration of the copyright notice.<br><br>
 
 When reprinting, quoting, or utilizing the data, you must clearly display the following copyright notice:<br>
-"Copyright 2026 Zarimap project All Rights Reserved."<br>
+"Copyright ©︎ 2026 Zarimap project All Rights Reserved."<br>
 In such a case, you don't need to contact.<br><br>
 <ul>
   <li>Please read <a href="README.md/#English">README.md</a>, too.</li>
 </ul>
+<br>
+latest:7/23
