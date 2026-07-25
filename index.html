@@ -36,6 +36,9 @@
     <!-- 修正後のファビコン記述（フルURL指定） -->
     <link rel="icon" href="https://maps.zaritsuri.com/assets/icons/apple-touch-icon.png" sizes="any" type="image/png">
     <link rel="apple-touch-icon" href="https://maps.zaritsuri.com/assets/icons/apple-touch-icon.png">
+    <!-- PWA 用 Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#b22222">
     <style>
         /* ザリガニをイメージした赤と泥色のデザイン */
         body {
@@ -90,6 +93,16 @@
     <div class="footer">
         © 2026 Zarimap project
     </div>
-
+<!-- Service Worker の登録 -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((reg) => console.log('Service Worker 登録成功:', reg.scope))
+            .catch((err) => console.log('Service Worker 登録失敗:', err));
+        });
+      }
+    </script>
+</body>
 </body>
 </html>
