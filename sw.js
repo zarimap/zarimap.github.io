@@ -7,6 +7,7 @@ const urlsToCache = [
   '/en/index.html',
   '/assets/css/style.css',
   '/assets/js/map-logic.js',
+  '/assets/data/zarigani.csv',
 ];
 
 // インストール処理
