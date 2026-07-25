@@ -3,6 +3,10 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/assets/icons/apple-touch-icon.png'
+  '/ja/index.html',
+  '/en/index.html',
+  '/assets/css/style.css',
+  '/assets/js/map-logic.js',
 ];
 
 // インストール処理
