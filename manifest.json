@@ -1,0 +1,23 @@
+{
+  "name": "ザリマップ - Zarimap",
+  "short_name": "ザリマップ",
+  "description": "日本全国のザリガニ目撃情報を共有・検索できるマップアプリです。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f1ea",
+  "theme_color": "#b22222",
+  "icons": [
+    {
+      "src": "https://maps.zaritsuri.com/assets/icons/apple-touch-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://maps.zaritsuri.com/assets/icons/apple-touch-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
