@@ -16,33 +16,27 @@ const STATIC_ASSETS = [
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
 ];
 
-// 1. インストール時に基本ファイルをキャッシュ
+// 1. インストール時（オンライン時のみ発火して基本ファイルをキャッシュ）
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
+      // STATIC_ASSETS のいずれかが取得できない場合（オフライン時など）はインストールを中断
       return cache.addAll(STATIC_ASSETS);
     })
   );
+  // 新しい Service Worker を即座に待機状態からアクティブへ
   self.skipWaiting();
 });
 
-// 2. 古いキャッシュの削除
+// 2. アクティベート時（以前にあった自動のキャッシュ削除を撤去）
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME && key !== TILE_CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
-    })
+    // 削除処理を行わず、即座に制御権を獲得する
+    self.clients.claim()
   );
-  self.clients.claim();
 });
 
-// 3. リクエストの制御（地図タイルのキャッシュ処理）
+// 3. リクエストの制御（地図タイルのキャッシュ ＋ 通常ファイルの Cache First）
 self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
 
@@ -50,22 +44,21 @@ self.addEventListener('fetch', (event) => {
   if (requestUrl.hostname.includes('cyberjapandata.gsi.go.jp')) {
     event.respondWith(
       caches.open(TILE_CACHE_NAME).then(async (cache) => {
-        // ① まずキャッシュを探す
+        // ① まずキャッシュを探す（キャッシュを保持し続ける）
         const cachedResponse = await cache.match(event.request);
         if (cachedResponse) {
           return cachedResponse; // キャッシュがあればそれを返す（オフライン表示）
         }
 
-        // ② キャッシュがなければネットワーク（通信）から取得
+        // ② キャッシュがなければネットワーク（オンライン時）から取得
         try {
           const networkResponse = await fetch(event.request);
-          // 正常に取得できたらキャッシュに保存する
+          // 正常に取得できたらキャッシュに永続保存する
           if (networkResponse.status === 200) {
             cache.put(event.request, networkResponse.clone());
           }
           return networkResponse;
         } catch (error) {
-          // 通信エラー（完全にオフラインで、かつ未読み込みの場所）の場合は何も返さない
           console.log('Tile fetch failed and not in cache:', event.request.url);
         }
       })
