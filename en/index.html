@@ -1,31 +1,29 @@
-
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Zarimap - Crayfish Search Map</title>
-<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
-<link href="../assets/css/style.css" rel="stylesheet"/>
-<style>
-        /* 地図の上にボタンを浮かせるためのスタイル */
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zarimap - Crayfish Search Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+    <style>
+        /* Styles for floating the button on the map */
         #map-container {
             position: relative;
-            flex: 1; /* 親のmain-containerがFlexboxの場合、画面いっぱいに広げる */
-            min-height: 400px; /* 必要に応じて調整 */
+            flex: 1; /* Expands to fill the screen if the parent main-container is a Flexbox */
+            min-height: 400px; /* Adjust as needed */
         }
 
         #map {
-            height: 100%; /* containerいっぱいに広げる */
+            height: 100%; /* Fill the container */
             width: 100%;
         }
 
         .map-floating-btn {
             position: absolute;
-            bottom: 20px;   /* 下から20px */
-            right: 20px;    /* 右から20px */
-            z-index: 1000;  /* Leafletより手前に表示 */
+            bottom: 20px;   /* 20px from bottom */
+            right: 20px;    /* 20px from right */
+            z-index: 1000;  /* Display in front of Leaflet map */
             
             padding: 12px 20px;
             background-color: #e67e22;
@@ -49,42 +47,30 @@
     </style>
 </head>
 <body>
-<header>
-<div class="header-inner">
-<h1>
-<a href="../index.html" style="color: inherit; text-decoration: none;">
-                    ザリマップ <span class="subtitle">ザリガニの目撃情報を共有</span>
-</a>
-</h1>
-<nav class="header-nav">
-<ul>
-<li><a href="../index.html">ホーム</a></li>
-<li><a href="details/post/">情報投稿</a></li>
-<li><a href="https://sites.google.com/view/dzt/" rel="noopener noreferrer" target="_blank">公式サイト</a></li>
-<li class="pc-only"><a href="https://github.com/zarimap/info/tree/main#english">About</a></li>
-<li><a href="../ja/">日本語</a></li>
-</ul>
-</nav>
-</div>
-</header>
-<div class="main-container">
-<!-- 地図を浮かせるボタンと一緒にラップする -->
-<div id="map-container">
-<div id="map"></div>
-<!-- マップ内に浮かせるボタン -->
-<button class="map-floating-btn" id="locate-btn" type="button">
-                🔍 近くのザリガニを探す
+    <header>
+@@ -28,7 +67,13 @@
+    </header>
+
+    <div class="main-container">
+        <div id="map"></div>
+        <div id="map-container">
+            <div id="map"></div>
+            
+            <button type="button" id="locate-btn" class="map-floating-btn">
+                🔍 Find Crayfish Nearby
             </button>
-</div>
-<div id="data-panel">
-<div id="info-content">
-<h3>読み込み中...</h3>
-<p>マップを動かして、近くの生息地を探してみましょう。</p>
-</div>
-</div>
-</div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>const currentLang = 'en';</script>
-<script src="../assets/js/map-logic.js"></script>
+        </div>
+
+        <div id="data-panel">
+            <div id="info-content">
+@@ -39,10 +84,7 @@
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>const currentLang = 'en';</script>
+
+    <script src="../assets/js/map-logic.js"></script>
+
 </body>
 </html>
