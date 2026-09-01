@@ -1,0 +1,37 @@
+name: Auto Translate JA to EN
+
+on:
+  push:
+    paths:
+      - 'ja/index.html' # ja/index.html の更新のみを検知
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # リポジトリへの書き込み権限を設定
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install deep-translator beautifulsoup4
+
+      - name: Run translation script
+        run: |
+          python scripts/translate.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add en/index.html
+          git diff --staged --quiet || git commit -m "auto: translate ja/index.html to en/index.html"
+          git push
