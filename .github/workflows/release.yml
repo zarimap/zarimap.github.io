@@ -2,10 +2,10 @@ name: Build and Release Desktop Apps
 
 on:
   release:
-    types: [published] # Web画面でReleaseを公開した瞬間に起動
+    types: [published]
 
 jobs:
-  release:
+  build:
     name: Build for ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -19,7 +19,7 @@ jobs:
             target: linux
 
     permissions:
-      contents: write # Releaseにバイナリを添付する権限
+      contents: write
 
     steps:
       - name: Check out repository
@@ -33,7 +33,20 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build and Upload to Release
+      - name: Build Electron App
+        run: npx electron-builder --${{ matrix.target }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx electron-builder --${{ matrix.target }}
+
+      # 生成された dist フォルダ内のインストーラーを Release Assets に確実に追加
+      - name: Upload Artifacts to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.AppImage
+            dist/*.zip
+            dist/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
