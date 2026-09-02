@@ -1,0 +1,34 @@
+# 依存ライブラリ（GitHub Actions側で npm install するため不要）
+node_modules/
+
+# Electron ビルド成果物（Releasesに自動アタッチされるため不要）
+dist/
+build/
+out/
+
+# ログ・キャッシュ
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+# OS自動生成ファイル
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# 開発環境・エディタの設定ファイル
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# 環境変数・一時ファイル
+.env
+.env.local
+*.tmp
+
+# 個人用ファイル
