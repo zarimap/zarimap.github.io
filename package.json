@@ -1,0 +1,34 @@
+{
+  "name": "zarimap-desktop",
+  "version": "1.0.0",
+  "description": "Zarimap Desktop App (Deprecated / Web Recommended)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.zaritsuri.zarimap",
+    "productName": "Zarimap",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": ["nsis", "zip"],
+      "icon": "assets/icons/apple-touch-icon.png"
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "icon": "assets/icons/apple-touch-icon.png",
+      "category": "public.app-category.utilities"
+    },
+    "linux": {
+      "target": ["AppImage", "tar.gz"],
+      "icon": "assets/icons/apple-touch-icon.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.0"
+  }
+}
