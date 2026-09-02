@@ -2,7 +2,7 @@ name: Build and Release Desktop Apps
 
 on:
   release:
-    types: [published]
+    types: [published] # Web画面でPublishを押した時に発動
 
 jobs:
   build:
@@ -19,7 +19,7 @@ jobs:
             target: linux
 
     permissions:
-      contents: write
+      contents: write # Releaseへのファイル追加権限
 
     steps:
       - name: Check out repository
@@ -33,13 +33,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      # 1. ビルドのみ実行（勝手にReleaseを作らせないために --publish never を指定）
       - name: Build Electron App
-        run: npx electron-builder --${{ matrix.target }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --${{ matrix.target }} --publish never
 
-      # 生成された dist フォルダ内のインストーラーを Release Assets に確実に追加
-      - name: Upload Artifacts to Release
+      # 2. Web上で手動作成した「現在のRelease」にファイルを直接紐付けて追加
+      - name: Upload Artifacts to Current Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
