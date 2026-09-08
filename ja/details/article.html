@@ -1,66 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スポット詳細 - ザリマップ</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        .detail-hero {
+            width: 100%; height: 300px;
+            background-color: #ddd;
+            background-size: cover; background-position: center;
+            border-radius: 12px; margin-bottom: 20px;
+            display: none;
+        }
+        .detail-card {
+            background: white; padding: 25px;
+            border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        .category-tag {
+            display: inline-block; background: #e67e22; color: white;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 10px;
+        }
+        .detail-title {
+            font-size: 1.8rem; color: #2c3e50; margin: 0 0 15px 0;
+            border-left: 5px solid #e67e22; padding-left: 15px;
+        }
+        .info-grid {
+            display: grid; grid-template-columns: 100px 1fr;
+            gap: 10px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;
+        }
+        .info-label { font-weight: bold; color: #7f8c8d; }
+        .back-link { display: inline-block; margin-top: 20px; color: #e67e22; text-decoration: none; font-weight: bold; }
+        .back-link:before { content: "← "; }
+        html, body { height: auto !important; overflow: visible !important; }
+        #loading { text-align: center; padding: 30px; font-weight: bold; color: #e67e22; }
+
+        /* iPad画面用デバッグパネル（最下部に自動生成） */
+        #debug-panel {
+            margin-top: 40px; padding: 15px; background: #1e293b; color: #f8fafc;
+            border-radius: 8px; font-family: monospace; font-size: 0.75rem;
+            line-height: 1.5; overflow-x: auto; text-align: left;
+        }
+        #debug-panel h3 { color: #38bdf8; margin: 0 0 10px 0; font-size: 0.9rem; border-bottom: 1px solid #334155; padding-bottom: 5px; }
+        .debug-tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-weight: bold; margin-right: 6px; }
+        .tag-ok { background: #22c55e; color: white; }
+        .tag-err { background: #ef4444; color: white; }
+        .tag-info { background: #3b82f6; color: white; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-inner">
+            <h1><a href="../../index.html" style="color: inherit; text-decoration: none;">ザリマップ <span class="subtitle">詳細情報</span></a></h1>
+            <nav class="header-nav">
+                <ul>
+                    <li><a href="../index.html">マップに戻る</a></li>
+                    <li><a href="post/index.html">情報を投稿</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container" style="display: block; padding: 20px; max-width: 800px; margin: 0 auto;">
+        <div id="loading">情報を読み込み中...</div>
+        
+        <div id="content" style="display: none;">
+            <a href="../index.html" class="back-link">マップへ戻る</a>
+
+            <article class="detail-card">
+                <img id="display-photo" src="" class="detail-hero" alt="現地の写真">
+                
+                <span class="category-tag">生息地情報</span>
+                <h2 class="detail-title" id="disp-name">---</h2>
+                <p class="detail-description" id="disp-desc" style="line-height: 1.8; color: #34495e; white-space: pre-wrap;"></p>
+
+                <div class="info-grid">
+                    <div class="info-label">住所</div>
+                    <div class="info-value" id="disp-address">---</div>
+                    <div class="info-label">確認時期</div>
+                    <div class="info-value" id="disp-period">---</div>
+                    <div class="info-label">種類</div>
+                    <div class="info-value" id="disp-type">---</div>
+                </div>
+                <!-- 地図表示エリア -->
+                <div style="margin-top: 20px;">
+                    <iframe
+                        id="disp-map"
+                        width="100%"
+                        height="300"
+                        style="border:0; border-radius: 12px;"
+                        loading="lazy"
+                        allowfullscreen
+                        referrerpolicy="no-referrer-when-downgrade"
+                        src="">
+                    </iframe>
+                </div>
+            </article>
+        </div>
+
+        <!-- iPad画面デバッグ表示用領域 -->
+        <div id="debug-panel">
+            <h3>iPad On-Screen Debugger</h3>
+            <div id="debug-log">ログを初期化中...</div>
+        </div>
+    </main>
+
     <script>
-        // URLの ?id=0 を取得
+        const debugLogElem = document.getElementById('debug-log');
+        let debugBuffer = "";
+
+        // iPad画面にデバッグ行を追加出力する関数
+        function logDebug(type, title, detail = "") {
+            let tagClass = "tag-info";
+            if (type === "OK") tagClass = "tag-ok";
+            if (type === "ERR") tagClass = "tag-err";
+
+            debugBuffer += `<div style="margin-bottom: 6px;">
+                <span class="debug-tag ${tagClass}">${type}</span>
+                <strong style="color:#f1f5f9;">${title}</strong>
+                ${detail ? `<br><span style="color:#94a3b8; margin-left:12px;">↳ ${detail}</span>` : ''}
+            </div>`;
+            debugLogElem.innerHTML = debugBuffer;
+        }
+
+        // 1. URLパラメータ解析
         const urlParams = new URLSearchParams(window.location.search);
         const rawId = urlParams.get('id');
         const spotId = parseInt(rawId, 10);
         const targetId = isNaN(spotId) ? 0 : spotId;
 
-        const loadingElem = document.getElementById('loading');
+        logDebug("INFO", "URLパラメータ判定", `入力パラメータ: "?id=${rawId}" ➔ 判定インデックス ID: [${targetId}]`);
 
-        // iPad用：画面上にログを出力するヘルパー関数
-        function showOnScreenLog(msg) {
-            loadingElem.innerHTML += `<br><span style="font-size:0.8rem; color:#666;">${msg}</span>`;
-        }
+        // 2. 最強化キャッシュバスター付きのURL生成
+        const cacheBuster = `cb=${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        const csvUrl = `../../assets/data/zarigani.csv?${cacheBuster}`;
 
-        showOnScreenLog(`[1] リクエストされたID: ${targetId} (URL入力値: "${rawId}")`);
+        logDebug("INFO", "CSV取得URL", csvUrl);
 
-        // 最強化キャッシュバスター付きURL
-        const csvUrl = `../../assets/data/zarigani.csv?cb=${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
+        // 3. CSVフェッチ処理
         fetch(csvUrl, {
             cache: 'no-cache',
-            headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
+            headers: {
+                'Pragma': 'no-cache',
+                'Cache-Control': 'no-cache'
+            }
         })
             .then(res => {
-                if (!res.ok) throw new Error('CSVファイルが通信エラーです');
+                if (!res.ok) throw new Error(`HTTP通信エラー (Status: ${res.status})`);
+                logDebug("OK", "CSVレスポンス受信成功", `Status: ${res.status}`);
                 return res.text();
             })
             .then(csvData => {
-                // 改行コード（Windows / Mac）に対応して分割
+                // 改行（Windows/Mac両対応）分割
                 const rawRows = csvData.trim().split(/\r?\n/);
-                showOnScreenLog(`[2] 読み込んだCSVの総行数: ${rawRows.length}行`);
+                logDebug("INFO", "CSV総行数", `${rawRows.length} 行検出`);
 
-                // ヘッダー除外 ＆ 空行削除
+                // ヘッダー除外 ＆ 空行除去
                 const dataRows = rawRows.slice(1).filter(row => row.trim() !== '');
-                showOnScreenLog(`[3] 有効なデータ件数: ${dataRows.length}件 (指定可能なID: 0 〜 ${dataRows.length - 1})`);
+                logDebug("INFO", "有効データ件数", `全 ${dataRows.length} 件 (指定可能ID: 0 〜 ${dataRows.length - 1})`);
 
-                // CSV行のパース
-                const data = dataRows.map(row => row.split(',').map(cell => cell.trim()));
+                // 全件パース処理
+                const data = dataRows.map((row, idx) => {
+                    const columns = row.split(',').map(c => c.trim());
+                    return columns;
+                });
 
+                // デバッグパネルに取得した全件リストの一覧を出力
+                let dataListSummary = data.map((d, i) => `[ID:${i}] ${d[0] || '名称未設定'}`).join(' | ');
+                logDebug("INFO", "全読み込みデータ一覧", dataListSummary);
+
+                // 指定IDのデータ存在確認
                 if (data[targetId]) {
                     const target = data[targetId];
-                    showOnScreenLog(`[4] ID ${targetId} のデータが見つかりました: "${target[0]}"`);
+                    logDebug("OK", `ID [${targetId}] のデータ抽出に成功！`, `名称: "${target[0]}" / 緯度経度: ${target[2]}, ${target[3]}`);
 
-                    // HTML要素へ書き込み
+                    // DOM反映
                     document.getElementById('disp-name').innerText = target[0] || "名称なし";
                     document.getElementById('disp-desc').innerText = target[4] || "説明はありません。";
                     document.getElementById('disp-address').innerText = target[8] || "不明";
                     document.getElementById('disp-period').innerText = target[9] || "不明";
                     document.getElementById('disp-type').innerText = target[10] || "不明";
-                    
-                    // Googleマップ処理
+
+                    // マップ埋め込み処理
                     const lat = target[2];
                     const lng = target[3];
                     const mapIframe = document.getElementById('disp-map');
                     if (lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng))) {
-                        const coordinate = lat + "," + lng;
+                        const coordinate = `${lat},${lng}`;
                         mapIframe.src = `https://www.google.com/maps?output=embed&q=${encodeURIComponent(coordinate)}&z=17`;
                         mapIframe.style.display = 'block';
                     } else {
                         mapIframe.style.display = 'none';
+                        logDebug("ERR", "座標データ不正", `lat: "${lat}", lng: "${lng}" ためマップ非表示`);
                     }
 
-                    // 写真表示処理
+                    // 画像表示処理
                     const photoUrl = target[5];
                     const imgElement = document.getElementById('display-photo');
                     if (photoUrl && photoUrl.startsWith('http')) {
@@ -69,21 +205,23 @@
                     } else {
                         imgElement.style.display = 'none';
                     }
-                    
-                    document.title = (target[0] || "スポット詳細") + " - ザリマップ";
 
-                    // 読み込み完了後に画面切り替え
-                    loadingElem.style.display = 'none';
+                    document.title = (target[0] || "スポット詳細") + " - ザリマップ";
+                    document.getElementById('loading').style.display = 'none';
                     document.getElementById('content').style.display = 'block';
                 } else {
-                    // IDが見つからない場合、画面上に理由を表示
-                    loadingElem.innerHTML = `
-                        <p style="color:red; font-weight:bold;">データ（ID: ${targetId}）が見つかりません。</p>
-                        <p style="font-size:0.9rem;">現在取得できている有効データ件数は <b>${data.length}件</b> です。<br>指定できるIDの範囲は <b>0 〜 ${data.length - 1}</b> になります。</p>
-                    `;
+                    logDebug("ERR", `ID [${targetId}] は存在しません！`, `全データ件数が ${data.length} 件のため、指定可能範囲は 0 〜 ${data.length - 1} です。`);
+                    document.getElementById('loading').innerHTML = `<span style="color:red;">データ（ID: ${targetId}）が見つかりませんでした。<br>下部のデバッグパネルを確認してください。</span>`;
                 }
             })
             .catch(err => {
-                loadingElem.innerHTML = `<p style="color:red;">エラー発生: ${err.message}</p>`;
+                logDebug("ERR", "処理例外エラー発生", err.message);
+                document.getElementById('loading').innerText = "エラーが発生しました: " + err.message;
             });
     </script>
+
+    <footer style="text-align: center; padding: 40px 0; color: #95a5a6; font-size: 0.9rem;">
+        &copy; 2026 Zarimap Project
+    </footer>
+</body>
+</html>
