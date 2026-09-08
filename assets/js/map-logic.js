@@ -171,9 +171,20 @@ window.closeDetails = function() {
     updateVisibleList(); 
 };
 
-// 3. CSVファイルを読み込んで処理する
-fetch('../../assets/data/zarigani.csv')
-    .then(response => response.text())
+// 3. CSVファイルを読み込んで処理する（最強化キャッシュバスター適用）
+const csvUrl = `../../assets/data/zarigani.csv?cb=${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+fetch(csvUrl, {
+    cache: 'no-cache', // HTTPキャッシュをバイパス
+    headers: {
+        'Pragma': 'no-cache',
+        'Cache-Control': 'no-cache'
+    }
+})
+    .then(response => {
+        if (!response.ok) throw new Error('CSV network response was not ok');
+        return response.text();
+    })
     .then(csvData => {
         const rows = csvData.trim().split('\n');
         for (let i = 1; i < rows.length; i++) {
@@ -236,6 +247,9 @@ fetch('../../assets/data/zarigani.csv')
             });
         }
         updateVisibleList(); 
+    })
+    .catch(error => {
+        console.warn('Network fetch failed, CSV fallback handled by SW:', error);
     });
 
 // 4. 地図が動いた時にリストを更新する
