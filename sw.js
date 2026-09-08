@@ -1,8 +1,6 @@
-const CACHE_NAME = 'zarimap-app-v3';
-const TILE_CACHE_NAME = 'zarimap-tiles-v3';
-// csvを更新。
+const CACHE_NAME = 'zarimap-static-cache';
+const TILE_CACHE_NAME = 'zarimap-gsi-tiles-v1';
 
-// アプリの基本ファイル（事前キャッシュ）
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -17,60 +15,76 @@ const STATIC_ASSETS = [
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
 ];
 
-// 1. インストール時（オンライン時のみ発火して基本ファイルをキャッシュ）
+
+// 1. インストール時：キャッシュを毎回ネットワークから最新状態で取得
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      // STATIC_ASSETS のいずれかが取得できない場合（オフライン時など）はインストールを中断
-      return cache.addAll(STATIC_ASSETS);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      console.log('[SW] Force re-installing: fetching fresh assets from network...');
+      
+      // 各ファイルをブラウザキャッシュ無視(reload)で最新取得して保存
+      const fetchPromises = STATIC_ASSETS.map(async (url) => {
+        try {
+          const response = await fetch(url, { cache: 'reload' });
+          if (response.ok) {
+            await cache.put(url, response);
+          }
+        } catch (err) {
+          console.warn('[SW] Failed to fetch fresh asset:', url, err);
+        }
+      });
+      
+      return Promise.all(fetchPromises);
     })
   );
-  // 新しい Service Worker を即座に待機状態からアクティブへ
+  // 待機せず即座に新しい SW を有効化
   self.skipWaiting();
 });
 
-// 2. アクティベート時（以前にあった自動のキャッシュ削除を撤去）
+// 2. アクティブ化時：クライアントの制御を即座に奪取
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    // 削除処理を行わず、即座に制御権を獲得する
-    self.clients.claim()
-  );
+  event.waitUntil(self.clients.claim());
 });
 
-// 3. リクエストの制御（地図タイルのキャッシュ ＋ 通常ファイルの Cache First）
+// 3. フェッチ処理
 self.addEventListener('fetch', (event) => {
-  const requestUrl = new URL(event.request.url);
+  const url = new URL(event.request.url);
 
-  // 国土地理院の地図タイル（または他のタイルサーバー）のリクエストの場合
-  if (requestUrl.hostname.includes('cyberjapandata.gsi.go.jp')) {
+  // GSIマップタイル（地図データ）はオフライン優先でキャッシュ利用
+  if (url.host.includes('gsi.go.jp')) {
     event.respondWith(
-      caches.open(TILE_CACHE_NAME).then(async (cache) => {
-        // ① まずキャッシュを探す（キャッシュを保持し続ける）
-        const cachedResponse = await cache.match(event.request);
-        if (cachedResponse) {
-          return cachedResponse; // キャッシュがあればそれを返す（オフライン表示）
-        }
+      caches.open(TILE_CACHE_NAME).then((cache) => {
+        return cache.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) return cachedResponse;
 
-        // ② キャッシュがなければネットワーク（オンライン時）から取得
-        try {
-          const networkResponse = await fetch(event.request);
-          // 正常に取得できたらキャッシュに永続保存する
-          if (networkResponse.status === 200) {
-            cache.put(event.request, networkResponse.clone());
-          }
-          return networkResponse;
-        } catch (error) {
-          console.log('Tile fetch failed and not in cache:', event.request.url);
-        }
+          return fetch(event.request).then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              cache.put(event.request, networkResponse.clone());
+            }
+            return networkResponse;
+          });
+        });
       })
     );
     return;
   }
 
-  // 地図タイル以外の通常のファイル（Cache First）
+  // アプリ本体：キャッシュがあれば返しつつ、バックグラウンドで最新を取得
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+    caches.match(event.request).then((cachedResponse) => {
+      const fetchPromise = fetch(event.request, { cache: 'reload' })
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => cachedResponse);
+
+      return cachedResponse || fetchPromise;
     })
   );
 });
