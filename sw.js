@@ -1,5 +1,6 @@
-const CACHE_NAME = 'zarimap-app-v2';
-const TILE_CACHE_NAME = 'zarimap-tiles-v2';
+const CACHE_NAME = 'zarimap-app-v3';
+const TILE_CACHE_NAME = 'zarimap-tiles-v3';
+// csvを更新。
 
 // アプリの基本ファイル（事前キャッシュ）
 const STATIC_ASSETS = [
