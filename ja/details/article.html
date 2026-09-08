@@ -92,21 +92,34 @@
     <script>
         // URLの ?id=0 を取得
         const urlParams = new URLSearchParams(window.location.search);
-        const spotId = parseInt(urlParams.get('id'));
+        const spotId = parseInt(urlParams.get('id'), 10);
 
         // IDが数値でない場合は0にする
         const targetId = isNaN(spotId) ? 0 : spotId;
 
-        // CSVの読み込み
-        fetch('../../assets/data/zarigani.csv')
+        // 最強化キャッシュバスター付きのURL生成
+        const csvUrl = `../../assets/data/zarigani.csv?cb=${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+        // CSVの読み込み（キャッシュ完全回避仕様）
+        fetch(csvUrl, {
+            cache: 'no-cache',
+            headers: {
+                'Pragma': 'no-cache',
+                'Cache-Control': 'no-cache'
+            }
+        })
             .then(res => {
                 if (!res.ok) throw new Error('CSVファイルが見つかりません');
                 return res.text();
             })
             .then(csvData => {
-                const rows = csvData.trim().split('\n');
-                // カンマ区切りでパース（単純なカンマ区切りの場合）
-                const data = rows.slice(1).map(row => row.split(','));
+                // \r\n (Windows) と \n (Mac/Linux) の両方の改行コードに対応
+                const rows = csvData.trim().split(/\r?\n/);
+
+                // ヘッダーを除外し、空行を取り除いて配列化
+                const data = rows.slice(1)
+                    .filter(row => row.trim() !== '')
+                    .map(row => row.split(',').map(cell => cell.trim()));
 
                 if (data[targetId]) {
                     const target = data[targetId];
@@ -123,9 +136,7 @@
                     const lng = target[3]; // 経度の列番号
                     const mapIframe = document.getElementById('disp-map');
                     if (lat && lng) {
-                        // 緯度と経度をカンマで結合する
                         const coordinate = lat + "," + lng;
-                        // 地図のURLを作成
                         const mapUrl = `https://www.google.com/maps?output=embed&q=${encodeURIComponent(coordinate)}&z=17`;
                         mapIframe.src = mapUrl;
                         mapIframe.style.display = 'block';
@@ -137,11 +148,11 @@
                     const photoUrl = target[5];
                     const imgElement = document.getElementById('display-photo');
 
-                    if (photoUrl && photoUrl.trim().startsWith('http')) {
-                        imgElement.src = photoUrl.trim();
-                        imgElement.style.display = 'block'; // 写真があれば表示
+                    if (photoUrl && photoUrl.startsWith('http')) {
+                        imgElement.src = photoUrl;
+                        imgElement.style.display = 'block';
                     } else {
-                        imgElement.style.display = 'none'; // なければ非表示
+                        imgElement.style.display = 'none';
                     }
                     
                     // ブラウザのタイトルを変更
