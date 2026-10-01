@@ -1,0 +1,32 @@
+name: Generate package-lock.json
+
+on:
+  workflow_dispatch: # 手動実行用
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # リポジトリへの書き込み権限
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # package-lock.json を作成する（`--package-lock-only`でインストール自体は省いて高速化）
+      - name: Generate package-lock.json
+        run: npm i --package-lock-only
+
+      # 生成された package-lock.json をリポジトリに自動コミット＆プッシュする
+      - name: Commit and push package-lock.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "chore: generate package-lock.json via Actions" || exit 0
+          git push
