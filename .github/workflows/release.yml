@@ -1,4 +1,4 @@
-name: Build and Release Desktop Apps
+Name: Build and Release Desktop Apps
 
 on:
   release:
@@ -6,9 +6,10 @@ on:
 
 jobs:
   build:
-    name: Build for ${{ matrix.os }}
+    name: Build for ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false # 1つのOSでエラーが出ても他のOSの処理を継続する
       matrix:
         include:
           - os: windows-latest
@@ -29,15 +30,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm' # ビルド時間を短縮するためのキャッシュ
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci # npm install より CI 環境に適したコマンド
 
-      # 1. ビルドのみ実行（勝手にReleaseを作らせないために --publish never を指定）
+      # 1. ビルドのみ実行
       - name: Build Electron App
         run: npx electron-builder --${{ matrix.target }} --publish never
 
-      # 2. Web上で手動作成した「現在のRelease」にファイルを直接紐付けて追加
+      # 2. 生成されたインストーラー・圧縮ファイルを自動検索してリリースに追加
       - name: Upload Artifacts to Current Release
         uses: softprops/action-gh-release@v2
         with:
@@ -45,7 +47,11 @@ jobs:
             dist/*.exe
             dist/*.dmg
             dist/*.AppImage
+            dist/*.deb
+            dist/*.snap
             dist/*.zip
             dist/*.tar.gz
+            dist/*.blockmap
+          fail_on_unmatched_files: false # 指定拡張子がなくてもエラーにしない
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
