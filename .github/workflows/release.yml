@@ -1,10 +1,10 @@
-Name: Build and Create Release Desktop Apps
+name: Build and Create Release Desktop Apps
 
 on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'リリース jak タグ名 (例: v1.0.0)'
+        description: 'リリース用タグ名 (例: v1.0.0)'
         required: true
         default: 'v1.0.0'
       release_name:
@@ -22,7 +22,7 @@ on:
 
 jobs:
   build:
-    name: Build and Release for ${{ matrix.target }}
+    name: Build for ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -36,7 +36,7 @@ jobs:
             target: linux
 
     permissions:
-      contents: write # 新しいReleaseやTagの作成・ファイル追加権限
+      contents: write # ReleaseやTagの作成・ファイル追加権限
 
     steps:
       - name: Check out repository
@@ -51,12 +51,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # 1. ビルドの実行
+      # 1. ビルドのみ実行
       - name: Build Electron App
         run: npx electron-builder --${{ matrix.target }} --publish never
 
-      # 2. 指定されたタグで新しいReleaseを作成し、成果物をアップロード
-      # (複数のOSジョブから同時に同じReleaseに対してファイルが追記・結合されます)
+      # 2. 自動で新しいReleaseを作成し、成果物を集約アップロード
       - name: Create Release and Upload Artifacts
         uses: softprops/action-gh-release@v2
         with:
