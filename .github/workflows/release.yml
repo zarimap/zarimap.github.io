@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'リリース用タグ名 (例: v1.0.0)'
+        description: 'リリース用タグ名 (既存と被らない値: 例 v1.0.1)'
         required: true
-        default: 'v1.0.0'
+        default: 'v1.0.1'
       release_name:
-        description: 'リリースタイトル (例: Release v1.0.0)'
+        description: 'リリースタイトル (例: Release v1.0.1)'
         required: true
-        default: 'Release v1.0.0'
+        default: 'Release v1.0.1'
       draft:
         description: '下書き（Draft）として作成するか'
         type: boolean
@@ -42,19 +42,22 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      # 1. Node.js のセットアップと npm キャッシュ
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
+      # 2. 高速＆確定的な依存関係のインストール
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      # 1. ビルドのみ実行
+      # 3. アプリのビルド
       - name: Build Electron App
         run: npx electron-builder --${{ matrix.target }} --publish never
 
-      # 2. 自動で新しいReleaseを作成し、成果物を集約アップロード
+      # 4. Releaseの作成と成果物のアップロード (バージョン名が入ったファイルも網羅)
       - name: Create Release and Upload Artifacts
         uses: softprops/action-gh-release@v2
         with:
