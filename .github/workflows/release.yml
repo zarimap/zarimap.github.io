@@ -1,15 +1,31 @@
-Name: Build and Release Desktop Apps
+Name: Build and Create Release Desktop Apps
 
 on:
-  release:
-    types: [published] # Web画面でPublishを押した時に発動
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'リリース jak タグ名 (例: v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+      release_name:
+        description: 'リリースタイトル (例: Release v1.0.0)'
+        required: true
+        default: 'Release v1.0.0'
+      draft:
+        description: '下書き（Draft）として作成するか'
+        type: boolean
+        default: false
+      prerelease:
+        description: 'プレリリース（Prerelease）とするか'
+        type: boolean
+        default: false
 
 jobs:
   build:
-    name: Build for ${{ matrix.target }}
+    name: Build and Release for ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false # 1つのOSでエラーが出ても他のOSの処理を継続する
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
@@ -20,7 +36,7 @@ jobs:
             target: linux
 
     permissions:
-      contents: write # Releaseへのファイル追加権限
+      contents: write # 新しいReleaseやTagの作成・ファイル追加権限
 
     steps:
       - name: Check out repository
@@ -30,19 +46,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm' # ビルド時間を短縮するためのキャッシュ
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci # npm install より CI 環境に適したコマンド
+        run: npm ci
 
-      # 1. ビルドのみ実行
+      # 1. ビルドの実行
       - name: Build Electron App
         run: npx electron-builder --${{ matrix.target }} --publish never
 
-      # 2. 生成されたインストーラー・圧縮ファイルを自動検索してリリースに追加
-      - name: Upload Artifacts to Current Release
+      # 2. 指定されたタグで新しいReleaseを作成し、成果物をアップロード
+      # (複数のOSジョブから同時に同じReleaseに対してファイルが追記・結合されます)
+      - name: Create Release and Upload Artifacts
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.tag_name }}
+          name: ${{ inputs.release_name }}
+          draft: ${{ inputs.draft }}
+          prerelease: ${{ inputs.prerelease }}
           files: |
             dist/*.exe
             dist/*.dmg
@@ -52,6 +73,6 @@ jobs:
             dist/*.zip
             dist/*.tar.gz
             dist/*.blockmap
-          fail_on_unmatched_files: false # 指定拡張子がなくてもエラーにしない
+          fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
