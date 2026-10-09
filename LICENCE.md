@@ -1,6 +1,7 @@
 Copyright ©︎ 2026 Zarimap project All Rights Reserved.
 
-# ライセンス
+## ライセンス
+
 [日本語]<br>
 本リポジトリ内のコンテンツ（コード、データ、ドキュメント等を含む）の著作権は、すべて Zarimap project に帰属します。<br>
 ※地図データ及び地図におけるjsライブラリはleaflet及び国土地理院の著作物です。<br><br>
@@ -19,7 +20,9 @@ Copyright ©︎ 2026 Zarimap project All Rights Reserved.
 <br>
 最終更新:7/23<br>
 ----------------------------------------------------------------------<br>
-# Licence
+
+## Licence
+
 [English]<br>
 All copyrights to the contents of this repository (including codes, data, documentation, etc.) belong to Zarimap project.<br><br>
 
