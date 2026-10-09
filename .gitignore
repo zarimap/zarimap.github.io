@@ -1,24 +1,32 @@
-# 依存ライブラリ（GitHub Actions側で npm install するため不要）
+# 依存ライブラリ
 node_modules/
 
-# Electron ビルド成果物（Releasesに自動アタッチされるため不要）
+# VSCode 拡張機能 ビルド成果物・パッケージ
+out/
 dist/
 build/
-out/
+*.vsix
+.vscode-test/
 
-# ログ・キャッシュ
+# ログ・キャッシュ・カバレッジ
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .eslintcache
+coverage/
+.nyc_output/
 
 # OS自動生成ファイル
 .DS_Store
 Thumbs.db
 ehthumbs.db
 
-# 開発環境・エディタの設定ファイル
-.vscode/
+# 開発環境・エディタ設定（個人設定は除外、共有設定は保持）
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/settings.json
 .idea/
 *.suo
 *.ntvs*
@@ -26,10 +34,12 @@ ehthumbs.db
 *.sln
 *.swp
 
-# 環境変数・一時ファイル
-.env
-.env.local
+# ソースマップ・一時ファイル
+*.js.map
+*.d.ts.map
 *.tmp
 
-# 個人用ファイル
+# 環境変数・個人用ファイル
+.env
+.env.local
 yml.txt
